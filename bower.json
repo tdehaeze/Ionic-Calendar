@@ -1,30 +1,20 @@
 {
-    "name": "calendar_pk",
-    "version": "0.2.9",
-    "homepage": "https://github.com/tdehaeze/Ionic-Calendar",
-    "authors": [
-        "tdehaeze <dehaeze.thomas@gmail.com>"
-    ],
-    "description": "A calendar directive for PK",
-    "main": [
-        "dist/css/calendar.css",
-        "dist/js/calendar-tpls.js"
-    ],
-    "keywords": [
-        "ionic",
-        "calendar"
-    ],
-    "dependencies": {
-        "ionic": "^1.2.4"
-    },
-    "license": "MIT",
-    "ignore": [
-        "lib/",
-        "css/",
-        "src/",
-        "template/",
-        ".jshintrc",
-        "gruntfile.js",
-        "package.json"
-    ]
+  "name": "calendar_pk",
+  "version": "0.2.9",
+  "main": [
+    "dist/css/calendar.css",
+    "dist/js/calendar-tpls.js"
+  ],
+  "ignore": [
+    "lib/",
+    "css/",
+    "src/",
+    "template/",
+    ".jshintrc",
+    "gruntfile.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "ionic": "^1.2.4"
+  }
 }
