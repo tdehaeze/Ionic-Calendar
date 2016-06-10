@@ -1,11 +1,11 @@
 {
-    "name": "ionic-calendar",
-    "version": "0.2.7",
-    "homepage": "https://github.com/twinssbc/Ionic-Calendar",
+    "name": "calendar_pk",
+    "version": "0.2.8",
+    "homepage": "https://github.com/tdehaeze/Ionic-Calendar",
     "authors": [
-        "twinssbc <bocong@hotmail.com>"
+        "tdehaeze <dehaeze.thomas@gmail.com>"
     ],
-    "description": "A calendar directive for Ionic framework",
+    "description": "A calendar directive for PK",
     "main": [
         "dist/css/calendar.css",
         "dist/js/calendar-tpls.js"
@@ -15,7 +15,7 @@
         "calendar"
     ],
     "dependencies": {
-        "ionic": "~1.1.1"
+        "ionic": "^1.2.4",
     },
     "license": "MIT",
     "ignore": [
