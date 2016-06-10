@@ -1,6 +1,6 @@
 {
     "name": "calendar_pk",
-    "version": "0.2.8",
+    "version": "0.2.9",
     "homepage": "https://github.com/tdehaeze/Ionic-Calendar",
     "authors": [
         "tdehaeze <dehaeze.thomas@gmail.com>"
@@ -15,7 +15,7 @@
         "calendar"
     ],
     "dependencies": {
-        "ionic": "^1.2.4",
+        "ionic": "^1.2.4"
     },
     "license": "MIT",
     "ignore": [

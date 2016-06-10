@@ -2,19 +2,14 @@
 
 Ionic calendar directive
 
-# Demo
-http://twinssbc.github.io/Ionic-Calendar/demo/
-
 # Usage
 
-Bower Install: `bower install ionic-calendar`
+Bower Install: `bower install calendar_pk`
 
 Load the necessary dependent files:
 
-    <link rel="stylesheet" href="http://code.ionicframework.com/1.1.1/css/ionic.min.css"/>
-    <link rel="stylesheet" href="<bower lib installation path>/ionic-calendar/dist/css/calendar.min.css"/>
-    <script src="http://code.ionicframework.com/1.1.1/js/ionic.bundle.min.js"></script>
-    <script src="<bower lib installation path>/ionic-calendar/dist/js/calendar-tpls.min.js"></script>
+    <link rel="stylesheet" href="lib/calendar_pk/dist/css/calendar.min.css"/>
+    <script src="lib/calendar_pk/dist/js/calendar-tpls.min.js"></script>
 
 Add the calendar module as a dependency to your application module:
 
@@ -26,57 +21,57 @@ Add the directive in the html page
 
 # Options
 
-* formatDay    
-The format of the date displayed in the month view.    
+* formatDay
+The format of the date displayed in the month view.
 Default value: 'dd'
-* formatDayHeader    
-The format of the header displayed in the month view.    
+* formatDayHeader
+The format of the header displayed in the month view.
 Default value: 'EEE'
-* formatDayTitle    
-The format of the title displayed in the day view.    
+* formatDayTitle
+The format of the title displayed in the day view.
 Default value: 'MMMM dd, yyyy'
-* formatWeekTitle    
-The format of the title displayed in the week view.    
+* formatWeekTitle
+The format of the title displayed in the week view.
 Default value: 'MMMM yyyy, Week w'
-* formatMonthTitle    
-The format of the title displayed in the month view.    
+* formatMonthTitle
+The format of the title displayed in the month view.
 Default value: 'MMMM yyyy'
-* formatWeekViewHeader    
-The format of the header displayed in the week view.    
+* formatWeekViewHeader
+The format of the header displayed in the week view.
 Default value: 'EEE d'
-* formatHourColumn    
-The format of the hour column displayed in the week and day view.    
+* formatHourColumn
+The format of the hour column displayed in the week and day view.
 Default value: 'ha'
-* calendarMode    
-The initial mode of the calendar.    
+* calendarMode
+The initial mode of the calendar.
 Default value: 'month'
-* showEventDetail    
-If set to true, when selecting the date in the month view, the events happened on that day will be shown below.    
+* showEventDetail
+If set to true, when selecting the date in the month view, the events happened on that day will be shown below.
 Default value: true
-* startingDayMonth    
-Control month view starting from which day.    
+* startingDayMonth
+Control month view starting from which day.
 Default value: 0
-* startingDayWeek    
-Control week view starting from which day.    
+* startingDayWeek
+Control week view starting from which day.
 Default value: 0
-* allDayLabel    
-The text displayed in the allDay column header.    
+* allDayLabel
+The text displayed in the allDay column header.
 Default value: ‘all day’
-* noEventsLabel    
-The text displayed when there’s no event on the selected date in month view.    
+* noEventsLabel
+The text displayed when there’s no event on the selected date in month view.
 Default value: ‘No Events’
-* eventSource    
-The data source of the calendar, when the eventSource is set, the view will be updated accordingly.    
-Default value: null    
+* eventSource
+The data source of the calendar, when the eventSource is set, the view will be updated accordingly.
+Default value: null
 The format of the eventSource is described in the EventSource section
-* queryMode    
-If queryMode is set to 'local', when the range or mode is changed, the calendar will use the already bound eventSource to update the view    
-If queryMode is set to 'remote', when the range or mode is changed, the calendar will trigger a callback function rangeChanged.    
-Users will need to implement their custom loading data logic in this function, and fill it into the eventSource. The eventSource is watched, so the view will be updated once the eventSource is changed.    
+* queryMode
+If queryMode is set to 'local', when the range or mode is changed, the calendar will use the already bound eventSource to update the view
+If queryMode is set to 'remote', when the range or mode is changed, the calendar will trigger a callback function rangeChanged.
+Users will need to implement their custom loading data logic in this function, and fill it into the eventSource. The eventSource is watched, so the view will be updated once the eventSource is changed.
 Default value: 'local'
-* step    
+* step
 It can be set to 15 or 30, so that the event can be displayed at more accurate position in weekview or dayview.
-* rangeChanged    
+* rangeChanged
 The callback function triggered when the range or mode is changed if the queryMode is set to 'remote'
 
         $scope.rangeChanged = function (startTime, endTime) {
@@ -85,30 +80,30 @@ The callback function triggered when the range or mode is changed if the queryMo
             });
         };
 
-* eventSelected    
+* eventSelected
 The callback function triggered when an event is clicked
 
         <calendar ... event-selected="onEventSelected(event)"></calendar>
-    
-    
+
+
         $scope.onEventSelected = function (event) {
             console.log(event.title);
         };
 
-* timeSelected    
+* timeSelected
 The callback function triggered when a date is selected in the monthview
 
         <calendar ... time-selected="onTimeSelected(selectedTime)"></calendar>
-        
+
         $scope.onTimeSelected = function (selectedTime) {
             console.log(event.selectedTime);
         };
 
-* titleChanged    
+* titleChanged
 The callback function triggered when the view title is changed
 
         <calendar ... title-changed="onViewTitleChanged(title)”></calendar>
-        
+
         $scope.onViewTitleChanged = function (title) {
             $scope.viewTitle = title;
         };
@@ -118,19 +113,19 @@ The callback function triggered when the view title is changed
 EventSource is an array of event object which contains at least below fields:
 
 * title
-* startTime    
-If allDay is set to true, the startTime has to be as a UTC date which time is set to 0:00 AM, because in an allDay event, only the date is considered, the exact time or timezone doesn't matter.    
+* startTime
+If allDay is set to true, the startTime has to be as a UTC date which time is set to 0:00 AM, because in an allDay event, only the date is considered, the exact time or timezone doesn't matter.
 For example, if an allDay event starting from 2014-05-09, then startTime is
 
         var startTime = new Date(Date.UTC(2014, 4, 8));
 
-* endTime    
-If allDay is set to true, the startTime has to be as a UTC date which time is set to 0:00 AM, because in an allDay event, only the date is considered, the exact time or timezone doesn't matter.    
+* endTime
+If allDay is set to true, the startTime has to be as a UTC date which time is set to 0:00 AM, because in an allDay event, only the date is considered, the exact time or timezone doesn't matter.
 For example, if an allDay event ending to 2014-05-10, then endTime is
 
         var endTime = new Date(Date.UTC(2014, 4, 9));
 
-* allDay    
+* allDay
 Indicates the event is allDay event or regular event
 
 **Note**
@@ -140,17 +135,17 @@ In case you want to manually insert/remove/update the element in the eventSource
 
 # Events
 
-* changeDate    
-When receiving this event, the calendar will move the current view to previous or next range.  
-Parameter: direction  
-1 - Forward  
+* changeDate
+When receiving this event, the calendar will move the current view to previous or next range.
+Parameter: direction
+1 - Forward
 -1 - Backward
 
         $scope.$broadcast('changeDate', 1);
 
-* eventSourceChanged    
-This event is only needed when you manually modify the element in the eventSource array.  
-Parameter: value  
+* eventSourceChanged
+This event is only needed when you manually modify the element in the eventSource array.
+Parameter: value
 The whole event source object
 
         $scope.$broadcast('eventSourceChanged',$scope.eventSource);
