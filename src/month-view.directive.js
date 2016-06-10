@@ -10,7 +10,7 @@
 
     directive.restrict = 'E';
     directive.replace = true;
-    directive.templateUrl = 'src/month-view.html';
+    directive.templateUrl = 'month-view.html';
     directive.require = ['^calendar', '?^ngModel'];
 
     directive.link = monthViewLink;

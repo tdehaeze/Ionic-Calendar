@@ -5,9 +5,23 @@ module.exports = function (grunt) {
         jshint: {
             all: ['src/*.js'],
         },
+        html2js: {
+            options: {
+                module: 'templates',
+                existingModule: false,
+                singleModule: true,
+                // base: 'src',
+                fileHeaderString: '(function() {\n\'use strict\';\n',
+                fileFooterString: '}());',
+            },
+            main: {
+                src: ['src/*.html'],
+                dest: 'src/templates.html.js'
+            },
+        },
         concat: {
             dist: {
-                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.controller.js', 'src/*.directive.js'],
+                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.directive.js', 'src/templates.html.js'],
                 dest: 'dist/js/calendar_pk.js',
             },
         },
@@ -43,5 +57,5 @@ module.exports = function (grunt) {
 
     require('load-grunt-tasks')(grunt);
 
-    grunt.registerTask('default', ['jshint:all', 'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist']);
+    grunt.registerTask('default', ['jshint:all', 'html2js:main' ,'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist']);
 };
