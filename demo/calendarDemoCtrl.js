@@ -1,4 +1,4 @@
-angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'ui.rCalendar'])
+angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
     .run(function ($ionicPlatform, $animate) {
         'use strict';
         $animate.enabled(false);
@@ -43,9 +43,6 @@ angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'ui.rCalendar'])
     .controller('CalendarDemoCtrl', function ($scope) {
         'use strict';
         $scope.calendar = {};
-        $scope.changeMode = function (mode) {
-            $scope.calendar.mode = mode;
-        };
 
         $scope.loadEvents = function () {
             $scope.calendar.eventSource = createRandomEvents();
