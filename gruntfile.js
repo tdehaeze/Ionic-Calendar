@@ -21,7 +21,7 @@ module.exports = function (grunt) {
         },
         concat: {
             dist: {
-                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.directive.js', 'src/templates.html.js'],
+                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.directive.js', 'src/*.filter.js', 'src/templates.html.js'],
                 dest: 'dist/js/calendar_pk.js',
             },
         },

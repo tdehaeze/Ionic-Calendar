@@ -19,15 +19,13 @@
     function monthViewLink(scope, element, attrs, ctrls) {
 
       var ctrl = ctrls[0],
-        ngModelCtrl = ctrls[1];
-      scope.showEventDetail = ctrl.showEventDetail;
+          ngModelCtrl = ctrls[1];
+
       scope.formatDayHeader = ctrl.formatDayHeader;
 
       ctrl.mode = {
         step: {months: 1}
       };
-
-      scope.noEventsLabel = ctrl.noEventsLabel;
 
       function getDates(startDate, n) {
         var dates = new Array(n), current = new Date(startDate), i = 0;

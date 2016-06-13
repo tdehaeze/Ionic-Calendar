@@ -14,7 +14,6 @@
     directive.templateUrl = 'calendar.html';
 
     directive.scope = {
-      calendarMode: '=',
       rangeChanged: '&',
       eventSelected: '&',
       timeSelected: '&',
@@ -51,23 +50,16 @@
       var ngModelCtrl = {$setViewValue: angular.noop}; // nullModelCtrl;
 
       // Configuration attributes
-      angular.forEach(['formatDay', 'formatDayHeader', 'formatDayTitle', 'formatWeekTitle', 'formatMonthTitle', 'formatWeekViewDayHeader', 'formatHourColumn',
-        'allDayLabel', 'noEventsLabel', 'showEventDetail', 'eventSource', 'queryMode', 'step', 'startingDayMonth', 'startingDayWeek'], function (key, index) {
+      angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'eventSource', 'queryMode', 'step', 'startingDayMonth', 'startingDayWeek'], function (key, index) {
         vm[key] = angular.isDefined($attrs[key]) ? (index < 9 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : calendarConfig[key];
       });
 
-      vm.hourParts = 1;
-      if (vm.step === 60 || vm.step === 30 || vm.step === 15) {
-        vm.hourParts = Math.floor(60 / vm.step);
-      } else {
-        throw new Error('Invalid step parameter: ' + vm.step);
-      }
+      vm.hourParts = Math.floor(60 / vm.step);
 
       $scope.$parent.$watch($attrs.eventSource, function (value) {
         vm.onEventSourceChanged(value);
       });
 
-      $scope.calendarMode = $scope.calendarMode || calendarConfig.calendarMode;
       if (angular.isDefined($attrs.initDate)) {
         vm.currentCalendarDate = $scope.$parent.$eval($attrs.initDate);
       }
@@ -193,12 +185,12 @@
           firstDayInNextMonth;
 
         calculateCalendarDate.setFullYear(year, month, date);
-        if ($scope.calendarMode === 'month') {
-          firstDayInNextMonth = new Date(year, month + 1, 1);
-          if (firstDayInNextMonth.getTime() <= calculateCalendarDate.getTime()) {
-            calculateCalendarDate = new Date(firstDayInNextMonth - 24 * 60 * 60 * 1000);
-          }
+
+        firstDayInNextMonth = new Date(year, month + 1, 1);
+        if (firstDayInNextMonth.getTime() <= calculateCalendarDate.getTime()) {
+          calculateCalendarDate = new Date(firstDayInNextMonth - 24 * 60 * 60 * 1000);
         }
+
         return calculateCalendarDate;
       }
 
@@ -351,7 +343,7 @@
       };
 
       vm.slideView = function (direction) {
-        var slideHandle = $ionicSlideBoxDelegate.$getByHandle($scope.calendarMode + 'view-slide');
+        var slideHandle = $ionicSlideBoxDelegate.$getByHandle('monthview-slide');
 
         if (slideHandle) {
           if (direction === 1) {

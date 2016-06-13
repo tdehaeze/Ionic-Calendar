@@ -13,11 +13,11 @@ Load the necessary dependent files:
 
 Add the calendar module as a dependency to your application module:
 
-    var myAppModule = angular.module('MyApp', ['ui.rCalendar'])
+    var myAppModule = angular.module('MyApp', ['calendar_pk'])
 
 Add the directive in the html page
 
-    <calendar calendar-mode="mode" event-source="eventSource">
+    <calendar event-source="eventSource">
 
 # Options
 
@@ -27,39 +27,15 @@ Default value: 'dd'
 * formatDayHeader
 The format of the header displayed in the month view.
 Default value: 'EEE'
-* formatDayTitle
-The format of the title displayed in the day view.
-Default value: 'MMMM dd, yyyy'
-* formatWeekTitle
-The format of the title displayed in the week view.
-Default value: 'MMMM yyyy, Week w'
 * formatMonthTitle
 The format of the title displayed in the month view.
 Default value: 'MMMM yyyy'
-* formatWeekViewHeader
-The format of the header displayed in the week view.
-Default value: 'EEE d'
-* formatHourColumn
-The format of the hour column displayed in the week and day view.
-Default value: 'ha'
-* calendarMode
-The initial mode of the calendar.
-Default value: 'month'
-* showEventDetail
-If set to true, when selecting the date in the month view, the events happened on that day will be shown below.
-Default value: true
 * startingDayMonth
 Control month view starting from which day.
 Default value: 0
 * startingDayWeek
 Control week view starting from which day.
 Default value: 0
-* allDayLabel
-The text displayed in the allDay column header.
-Default value: ‘all day’
-* noEventsLabel
-The text displayed when there’s no event on the selected date in month view.
-Default value: ‘No Events’
 * eventSource
 The data source of the calendar, when the eventSource is set, the view will be updated accordingly.
 Default value: null
@@ -69,8 +45,6 @@ If queryMode is set to 'local', when the range or mode is changed, the calendar 
 If queryMode is set to 'remote', when the range or mode is changed, the calendar will trigger a callback function rangeChanged.
 Users will need to implement their custom loading data logic in this function, and fill it into the eventSource. The eventSource is watched, so the view will be updated once the eventSource is changed.
 Default value: 'local'
-* step
-It can be set to 15 or 30, so that the event can be displayed at more accurate position in weekview or dayview.
 * rangeChanged
 The callback function triggered when the range or mode is changed if the queryMode is set to 'remote'
 
