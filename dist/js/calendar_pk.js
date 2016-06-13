@@ -18,11 +18,10 @@
     formatDay: 'dd',
     formatDayHeader: 'EEE',
     formatMonthTitle: 'MMMM yyyy',
-    startingDayMonth: 0,
-    startingDayWeek: 0,
     eventSource: null,
     queryMode: 'local',
-    step: 30
+    step: 30,
+    startingDayMonth: 1,
   });
 
 })();
@@ -76,11 +75,14 @@
     function CalendarController($scope, $attrs, $parse, $interpolate, calendarConfig, $timeout, $ionicSlideBoxDelegate) {
       var vm = this;
 
+      console.log('$attrs', $attrs);
+
       var ngModelCtrl = {$setViewValue: angular.noop}; // nullModelCtrl;
 
       // Configuration attributes
-      angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'eventSource', 'queryMode', 'step', 'startingDayMonth', 'startingDayWeek'], function (key, index) {
-        vm[key] = angular.isDefined($attrs[key]) ? (index < 9 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : calendarConfig[key];
+      angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'eventSource', 'queryMode', 'step', 'startingDayMonth'], function (key, index) {
+        // vm[key] = angular.isDefined($attrs[key]) ? (index < 4 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : calendarConfig[key];
+        vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
       });
 
       vm.hourParts = Math.floor(60 / vm.step);
@@ -437,13 +439,12 @@
 
       function updateCurrentView(currentViewStartDate, view) {
         var currentCalendarDate = ctrl.currentCalendarDate,
-          today = new Date(),
-          oneDay = 86400000,
-          r,
-          selectedDayDifference = Math.floor((currentCalendarDate.getTime() - currentViewStartDate.getTime()) / oneDay),
-          currentDayDifference = Math.floor((today.getTime() - currentViewStartDate.getTime()) / oneDay);
+            today = new Date(),
+            oneDay = 86400000,
+            selectedDayDifference = Math.floor((currentCalendarDate.getTime() - currentViewStartDate.getTime()) / oneDay),
+            currentDayDifference = Math.floor((today.getTime() - currentViewStartDate.getTime()) / oneDay);
 
-        for (r = 0; r < 42; r += 1) {
+        for (var r = 0; r < 42; r += 1) {
           view.dates[r].selected = false;
         }
 
@@ -519,37 +520,34 @@
         }
       };
 
+      // Used to the the class depending of the event/month
       scope.getHighlightClass = function (date) {
         var className = '';
 
+        // if has an event
         if (date.hasEvent) {
-          if (date.secondary) {
-            className = 'monthview-secondary-with-event';
-          } else {
-            className = 'monthview-primary-with-event';
-          }
+          className = date.secondary ? 'monthview-secondary' : 'monthview-primary';
+          className += ' ';
         }
 
+        // Selected date
         if (date.selected) {
-          if (className) {
-            className += ' ';
-          }
           className += 'monthview-selected';
+          className += ' ';
         }
 
+        // Today date
         if (date.current) {
-          if (className) {
-            className += ' ';
-          }
           className += 'monthview-current';
+          className += ' ';
         }
 
+        // From an other month
         if (date.secondary) {
-          if (className) {
-            className += ' ';
-          }
           className += 'text-muted';
+          className += ' ';
         }
+        className = className.slice(0, -1);
         return className;
       };
 
@@ -709,20 +707,24 @@
 })();
 
 (function() {
-  'use strict';
-
   angular.module('filters')
-  .filter('range', function() {
-    return function(input, total) {
-      total = parseInt(total);
+    .filter('weekNumber', weekNumber);
 
-      for (var i=0; i<total; i++) {
-        input.push(i);
-      }
+  weekNumber.$inject = [];
 
-      return input;
+  function weekNumber() {
+    return function (date) {
+      date = new Date(+date);
+      date.setHours(0, 0, 0, 0);
+      // Thursday in current week decides the year.
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      // January 4 is always in week 1.
+      var week1 = new Date(date.getFullYear(), 0, 4);
+      // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+      return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
     };
-  });
+
+  }
 })();
 
 (function() {
@@ -730,44 +732,48 @@
 
 angular.module('templates', []).run(['$templateCache', function($templateCache) {
   $templateCache.put("calendar.html",
-    "<div class=\"calendar-container\">\n" +
+    "<div style=\"height: 100%;\">\n" +
     "  <month-view></month-view>\n" +
     "</div>\n" +
     "");
   $templateCache.put("month-view.html",
     "<div>\n" +
-    "    <ion-slide-box  class=\"monthview-slide\"\n" +
-    "                    on-slide-changed=\"slideChanged($index)\"\n" +
+    "    <ion-slide-box  on-slide-changed=\"slideChanged($index)\"\n" +
     "                    does-continue=\"true\"\n" +
     "                    show-pager=\"false\"\n" +
-    "                    delegate-handle=\"monthview-slide\">\n" +
+    "                    delegate-handle=\"monthview-slide\"\n" +
+    "                    style=\"height: auto;\">\n" +
     "        <ion-slide ng-repeat=\"view in views track by $index\">\n" +
-    "            <table ng-if=\"$index===currentViewIndex\" class=\"table table-bordered table-fixed monthview-datetable\">\n" +
+    "            <table ng-if=\"$index===currentViewIndex\" class=\"table-bordered monthview-datetable\">\n" +
     "                <thead>\n" +
     "                    <tr>\n" +
+    "                        <th></th>\n" +
     "                        <th ng-repeat=\"day in view.dates.slice(0,7) track by day.date\">\n" +
-    "                            <small>{{::day.date | date: formatDayHeader}}</small>\n" +
+    "                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>\n" +
     "                        </th>\n" +
     "                    </tr>\n" +
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
+    "                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
     "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
     "                            ng-click=\"select(view.dates[7*i+j].date)\"\n" +
     "                            ng-class=\"getHighlightClass(view.dates[7*i+j])\">{{view.dates[7*i+j].label}}</td>\n" +
     "                    </tr>\n" +
     "                </tbody>\n" +
     "            </table>\n" +
-    "            <table ng-if=\"$index!==currentViewIndex\" class=\"table table-bordered table-fixed monthview-datetable\">\n" +
+    "            <table ng-if=\"$index!==currentViewIndex\" class=\"table-bordered monthview-datetable\">\n" +
     "                <thead>\n" +
     "                    <tr class=\"text-center\">\n" +
+    "                        <th></th>\n" +
     "                        <th ng-repeat=\"day in view.dates.slice(0,7) track by day.date\">\n" +
-    "                            <small>{{::day.date | date: formatDayHeader}}</small>\n" +
+    "                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>\n" +
     "                        </th>\n" +
     "                    </tr>\n" +
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
+    "                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
     "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\">{{view.dates[7*i+j].label}}</td>\n" +
     "                    </tr>\n" +
     "                </tbody>\n" +

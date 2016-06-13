@@ -6,11 +6,10 @@
     formatDay: 'dd',
     formatDayHeader: 'EEE',
     formatMonthTitle: 'MMMM yyyy',
-    startingDayMonth: 0,
-    startingDayWeek: 0,
     eventSource: null,
     queryMode: 'local',
-    step: 30
+    step: 30,
+    startingDayMonth: 1,
   });
 
 })();

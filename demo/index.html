@@ -10,6 +10,7 @@
         <script src="../dist/js/calendar_pk.js"></script>
         <script src="calendarDemoCtrl.js"></script>
         <script src="http://code.angularjs.org/1.4.3/i18n/angular-locale_fr.js"></script>
+        <script src="//localhost:35729/livereload.js"></script>
     </head>
 
     <body>
@@ -49,7 +50,8 @@
                                 range-changed="reloadSource(startTime, endTime)"
                                 event-selected="onEventSelected(event)"
                                 title-changed="onViewTitleChanged(title)"
-                                time-selected="onTimeSelected(selectedTime)"></calendar>
+                                time-selected="onTimeSelected(selectedTime)"
+                                step="15"></calendar>
                     <!-- <calendar   ng-model="calendar.currentDate"
                                 calendar-mode="calendar.mode"
                                 event-source="calendar.eventSource"

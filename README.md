@@ -33,9 +33,6 @@ Default value: 'MMMM yyyy'
 * startingDayMonth
 Control month view starting from which day.
 Default value: 0
-* startingDayWeek
-Control week view starting from which day.
-Default value: 0
 * eventSource
 The data source of the calendar, when the eventSource is set, the view will be updated accordingly.
 Default value: null

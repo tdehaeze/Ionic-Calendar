@@ -46,13 +46,12 @@
 
       function updateCurrentView(currentViewStartDate, view) {
         var currentCalendarDate = ctrl.currentCalendarDate,
-          today = new Date(),
-          oneDay = 86400000,
-          r,
-          selectedDayDifference = Math.floor((currentCalendarDate.getTime() - currentViewStartDate.getTime()) / oneDay),
-          currentDayDifference = Math.floor((today.getTime() - currentViewStartDate.getTime()) / oneDay);
+            today = new Date(),
+            oneDay = 86400000,
+            selectedDayDifference = Math.floor((currentCalendarDate.getTime() - currentViewStartDate.getTime()) / oneDay),
+            currentDayDifference = Math.floor((today.getTime() - currentViewStartDate.getTime()) / oneDay);
 
-        for (r = 0; r < 42; r += 1) {
+        for (var r = 0; r < 42; r += 1) {
           view.dates[r].selected = false;
         }
 
@@ -128,37 +127,34 @@
         }
       };
 
+      // Used to the the class depending of the event/month
       scope.getHighlightClass = function (date) {
         var className = '';
 
+        // if has an event
         if (date.hasEvent) {
-          if (date.secondary) {
-            className = 'monthview-secondary-with-event';
-          } else {
-            className = 'monthview-primary-with-event';
-          }
+          className = date.secondary ? 'monthview-secondary' : 'monthview-primary';
+          className += ' ';
         }
 
+        // Selected date
         if (date.selected) {
-          if (className) {
-            className += ' ';
-          }
           className += 'monthview-selected';
+          className += ' ';
         }
 
+        // Today date
         if (date.current) {
-          if (className) {
-            className += ' ';
-          }
           className += 'monthview-current';
+          className += ' ';
         }
 
+        // From an other month
         if (date.secondary) {
-          if (className) {
-            className += ' ';
-          }
           className += 'text-muted';
+          className += ' ';
         }
+        className = className.slice(0, -1);
         return className;
       };
 

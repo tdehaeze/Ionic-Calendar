@@ -1,36 +1,40 @@
 <div>
-    <ion-slide-box  class="monthview-slide"
-                    on-slide-changed="slideChanged($index)"
+    <ion-slide-box  on-slide-changed="slideChanged($index)"
                     does-continue="true"
                     show-pager="false"
-                    delegate-handle="monthview-slide">
+                    delegate-handle="monthview-slide"
+                    style="height: auto;">
         <ion-slide ng-repeat="view in views track by $index">
-            <table ng-if="$index===currentViewIndex" class="table table-bordered table-fixed monthview-datetable">
+            <table ng-if="$index===currentViewIndex" class="table-bordered monthview-datetable">
                 <thead>
                     <tr>
+                        <th></th>
                         <th ng-repeat="day in view.dates.slice(0,7) track by day.date">
-                            <small>{{::day.date | date: formatDayHeader}}</small>
+                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="i in [0,1,2,3,4,5]">
+                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
                         <td ng-repeat="j in [0,1,2,3,4,5,6]"
                             ng-click="select(view.dates[7*i+j].date)"
                             ng-class="getHighlightClass(view.dates[7*i+j])">{{view.dates[7*i+j].label}}</td>
                     </tr>
                 </tbody>
             </table>
-            <table ng-if="$index!==currentViewIndex" class="table table-bordered table-fixed monthview-datetable">
+            <table ng-if="$index!==currentViewIndex" class="table-bordered monthview-datetable">
                 <thead>
                     <tr class="text-center">
+                        <th></th>
                         <th ng-repeat="day in view.dates.slice(0,7) track by day.date">
-                            <small>{{::day.date | date: formatDayHeader}}</small>
+                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="i in [0,1,2,3,4,5]">
+                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
                         <td ng-repeat="j in [0,1,2,3,4,5,6]">{{view.dates[7*i+j].label}}</td>
                     </tr>
                 </tbody>

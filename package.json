@@ -15,8 +15,10 @@
     "grunt-contrib-cssmin": "^1.0.1",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-html2js": "^0.3.6",
     "grunt-sass": "^1.2.0",
+    "grunt-scss-lint": "^0.3.8",
     "load-grunt-tasks": "^3.5.0"
   }
 }

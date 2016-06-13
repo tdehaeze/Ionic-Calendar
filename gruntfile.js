@@ -16,12 +16,12 @@ module.exports = function (grunt) {
             },
             main: {
                 src: ['src/*.html'],
-                dest: 'src/templates.html.js'
+                dest: 'src/temp/templates.html.js'
             },
         },
         concat: {
             dist: {
-                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.directive.js', 'src/*.filter.js', 'src/templates.html.js'],
+                src: ['src/calendar_pk.module.js', 'src/*.constant.js', 'src/*.directive.js', 'src/*.filter.js', 'src/temp/*.html.js'],
                 dest: 'dist/js/calendar_pk.js',
             },
         },
@@ -54,11 +54,31 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            dist: ['src/*.html.js'],
+            dist: ['src/temp/*.html.js'],
         },
+        watch: {
+            js: {
+                files: ['src/*.js', 'src/*.html'],
+                tasks: ['jshint:all', 'html2js:main', 'concat:dist', 'uglify:dist', 'clean:dist'],
+                options: {
+                    spawn: false,
+                },
+            },
+            css: {
+                files: ['src/scss/*.scss'],
+                tasks: ['sass:dist', 'cssmin:dist'],
+            }
+        },
+        scsslint: {
+            all: ['src/scss/*.scss'],
+            options: {
+                colorizeOutput: true,
+                config: '.scss-lint.yml',
+            },
+        }
     });
 
     require('load-grunt-tasks')(grunt);
 
-    grunt.registerTask('default', ['jshint:all', 'html2js:main' ,'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist', 'clean:dist']);
+    grunt.registerTask('default', ['jshint:all', 'scsslint:all', 'html2js:main', 'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist', 'clean:dist', 'watch']);
 };
