@@ -52,10 +52,13 @@ module.exports = function (grunt) {
                     'dist/css/calendar.min.css': ['dist/css/calendar.css']
                 }
             }
-        }
+        },
+        clean: {
+            dist: ['src/*.html.js'],
+        },
     });
 
     require('load-grunt-tasks')(grunt);
 
-    grunt.registerTask('default', ['jshint:all', 'html2js:main' ,'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist']);
+    grunt.registerTask('default', ['jshint:all', 'html2js:main' ,'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist', 'clean:dist']);
 };
