@@ -66,7 +66,7 @@ module.exports = function (grunt) {
             },
             css: {
                 files: ['src/scss/*.scss'],
-                tasks: ['sass:dist', 'cssmin:dist'],
+                tasks: ['scsslint:all', 'sass:dist', 'cssmin:dist'],
             }
         },
         scsslint: {
@@ -80,5 +80,6 @@ module.exports = function (grunt) {
 
     require('load-grunt-tasks')(grunt);
 
-    grunt.registerTask('default', ['jshint:all', 'scsslint:all', 'html2js:main', 'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist', 'clean:dist', 'watch']);
+    grunt.registerTask('dist', ['jshint:all', 'scsslint:all', 'html2js:main', 'concat:dist', 'uglify:dist', 'sass:dist', 'cssmin:dist', 'clean:dist'])
+    grunt.registerTask('default', ['dist', 'watch']);
 };

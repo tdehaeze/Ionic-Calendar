@@ -1,33 +1,35 @@
-table.table-bordered {
+.table-bordered {
   width: 100%;
   max-width: 100%;
   background-color: transparent;
   border-top: 1px solid #969696;
   border-bottom: 1px solid #969696;
   table-layout: fixed; }
-  table.table-bordered td, table.table-bordered th {
+  .table-bordered td,
+  .table-bordered th {
     text-align: center;
     vertical-align: middle; }
-  table.table-bordered > thead > tr {
+  .table-bordered > thead > tr {
     background-color: #f0f0f0;
     border-bottom: 2px solid #969696; }
-    table.table-bordered > thead > tr > th {
+    .table-bordered > thead > tr > th {
+      line-height: 2.5em;
       border-right: 1px solid #969696; }
-      table.table-bordered > thead > tr > th:first-child {
+      .table-bordered > thead > tr > th:first-child {
         border-right: 2px solid #969696; }
-  table.table-bordered > tbody > tr > td {
+  .table-bordered > tbody > tr > td {
     border-bottom: 1px solid #969696;
     border-right: 1px solid #969696; }
-    table.table-bordered > tbody > tr > td:first-child {
+    .table-bordered > tbody > tr > td:first-child {
       background-color: #f0f0f0;
       border-right: 2px solid #969696; }
-  table.table-bordered .monthview-primary {
+  .table-bordered .monthview-primary {
     background-color: #d34121;
     color: white; }
-  table.table-bordered .monthview-secondary {
+  .table-bordered .monthview-secondary {
     background-color: #e5745b; }
-  table.table-bordered .monthview-current {
+  .table-bordered .monthview-current {
     font-weight: bold;
     font-size: 1.2em; }
-  table.table-bordered .text-muted {
+  .table-bordered .text-muted {
     color: #323232; }

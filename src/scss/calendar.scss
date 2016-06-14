@@ -1,6 +1,6 @@
 @import 'colors';
 
-table.table-bordered {
+.table-bordered {
     width: 100%;
     max-width: 100%;
 
@@ -11,7 +11,8 @@ table.table-bordered {
 
     table-layout: fixed;
 
-    td, th {
+    td,
+    th {
         text-align: center;
         vertical-align: middle;
     }
@@ -21,6 +22,7 @@ table.table-bordered {
             background-color: $very-light-grey;
             border-bottom: 2px solid $grey;
             > th {
+                line-height: 2.5em;
                 border-right: 1px solid $grey;
                 &:first-child {
                     border-right: 2px solid $grey;
