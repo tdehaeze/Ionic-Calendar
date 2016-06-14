@@ -1,8 +1,18 @@
-angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
+(function() {
+    'use strict';
+
+    angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
     .run(function ($ionicPlatform, $animate) {
         'use strict';
         $animate.enabled(false);
     })
+})();
+
+
+(function() {
+    'use strict';
+
+    angular.module('calendarDemoApp')
     .config(function ($stateProvider, $urlRouterProvider) {
         'use strict';
         $stateProvider
@@ -39,11 +49,20 @@ angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
 
         $urlRouterProvider.otherwise('/tab/home');
     })
+})();
 
-    .controller('CalendarDemoCtrl', function ($scope) {
-        'use strict';
+
+(function() {
+    'use strict';
+
+    angular.module('calendarDemoApp')
+    .controller('CalendarDemoCtrl', CalendarDemoCtrl);
+
+    CalendarDemoCtrl.$inject = ['$scope'];
+    function CalendarDemoCtrl($scope) {
         $scope.calendar = {};
         $scope.calendar.eventSource = [];
+        $scope.viewTitle = {};
 
         $scope.loadEvents = function () {
             var events = [];
@@ -64,48 +83,9 @@ angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
             $scope.viewTitle = title;
         };
 
-        $scope.today = function () {
-            $scope.calendar.currentDate = new Date();
-        };
-
-        $scope.isToday = function () {
-            var today = new Date(),
-                currentCalendarDate = new Date($scope.calendar.currentDate);
-
-            today.setHours(0, 0, 0, 0);
-            currentCalendarDate.setHours(0, 0, 0, 0);
-            return today.getTime() === currentCalendarDate.getTime();
-        };
-
-        function getEventIndex (events, time) {
-            var j = -1;
-
-            for (var i = 0; i < events.length; i++) {
-                if (events[i].startTime === time){
-                    var j = i;
-                    break;
-                }
-            }
-
-            return j;
-        };
-
         // Called when clicking on a date
         $scope.onTimeSelected = function (selectedTime) {
-            var eventSource = $scope.calendar.eventSource;
-            var lapin = {
-                startTime: selectedTime,
-                endTime: selectedTime,
-            };
-
-            var j = getEventIndex(eventSource, selectedTime)
-
-            if (j > -1) {
-                eventSource.splice(j, 1);
-            } else {
-                eventSource.push(lapin);
-            }
-
             console.log('Selected time: ' + selectedTime);
         };
-    });
+    }
+})();

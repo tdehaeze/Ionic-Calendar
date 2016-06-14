@@ -37,9 +37,8 @@
         </script>
 
         <script id="templates/home.html" type="text/ng-template">
-            <ion-view view-title={{viewTitle}}>
+            <ion-view view-title={{viewTitle.lapin}}>
                 <ion-nav-buttons side="right">
-                    <button class="button" ng-disabled="isToday()" ng-click="today()">Today</button>
                     <button class="button" ng-click="loadEvents()">Load Events</button>
                 </ion-nav-buttons>
 
@@ -48,7 +47,8 @@
                     <calendar   ng-model="calendar.currentDate"
                                 event-source="calendar.eventSource"
                                 title-changed="onViewTitleChanged(title)"
-                                time-selected="onTimeSelected(selectedTime)"></calendar>
+                                time-selected="onTimeSelected(selectedTime)"
+                                month-Title="viewTitle"></calendar>
                     <!-- <calendar   ng-model="calendar.currentDate"
                                 calendar-mode="calendar.mode"
                                 event-source="calendar.eventSource"
