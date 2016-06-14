@@ -18,17 +18,18 @@
       timeSelected:  '&', // Called when clicking on a date
       titleChanged:  '&', // Called when changing the month (TODO => same time called with rangeChanged ? => fusion ?)
       eventSource:   '=', // All the events => two way data binding
-      monthTitle:    '=',
+      monthTitle:    '=', //
     };
 
     directive.require = ['calendar', '?^ngModel'];
 
     directive.controllerAs = 'cc';
     directive.controller = CalendarController;
-    CalendarController.$inject = ['$scope', '$attrs', '$parse', '$interpolate', 'calendarConfig', '$timeout', '$ionicSlideBoxDelegate', 'dateFilter'];
-    function CalendarController($scope, $attrs, $parse, $interpolate, calendarConfig, $timeout, $ionicSlideBoxDelegate, dateFilter) {
+    CalendarController.$inject = ['$scope', '$attrs', '$interpolate', 'calendarConfig', '$timeout', 'dateFilter'];
+    function CalendarController($scope, $attrs, $interpolate, calendarConfig, $timeout, dateFilter) {
       var vm = this;
 
+      // TODO
       $scope.$watch(function(){
         return $scope.eventSource;
       }, function (newVal, oldVal) {
@@ -44,40 +45,7 @@
           vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
         });
 
-        // TODO => no more currentCalendarDate
-        // if (angular.isDefined($attrs.initDate)) {
-        //   vm.currentCalendarDate = $scope.$parent.$eval($attrs.initDate);
-        // }
-
-        if (!vm.currentCalendarDate) {
-          vm.currentCalendarDate = new Date();
-          // if ($attrs.ngModel && !$scope.$parent.$eval($attrs.ngModel)) {
-          //   $parse($attrs.ngModel).assign($scope.$parent, vm.currentCalendarDate);
-          // }
-        }
-      }
-
-
-
-      // Used to get the "AdjacentCalendarDate"
-      // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
-      // => from the direction, add/substract one month to currentCalendarDate
-      // => TODO : should delete this function => no more currentCalendarDate/selectedDate
-      function getAdjacentCalendarDate(currentCalendarDate, direction) {
-        var calculateCalendarDate = new Date(currentCalendarDate),
-            year = calculateCalendarDate.getFullYear(),
-            month = calculateCalendarDate.getMonth() + direction,
-            date = calculateCalendarDate.getDate(),
-            firstDayInNextMonth;
-
-        calculateCalendarDate.setFullYear(year, month, date);
-
-        firstDayInNextMonth = new Date(year, month + 1, 1);
-        if (firstDayInNextMonth.getTime() <= calculateCalendarDate.getTime()) {
-          calculateCalendarDate = new Date(firstDayInNextMonth - 24 * 60 * 60 * 1000);
-        }
-
-        return calculateCalendarDate;
+        vm.currentDate = new Date();
       }
 
       // DONE
@@ -158,7 +126,6 @@
 
         // First called when changing the month
         // => calculate the direction of the slide
-        // => get the currentCalendarDate from getAdjacentCalendarDate and the direction
         // => call refreshView
         $scope.slideChanged = function ($index) {
           $timeout(function () {
@@ -173,26 +140,72 @@
 
             $scope.currentViewIndex = $index;
 
-            vm.currentCalendarDate = getAdjacentCalendarDate(vm.currentCalendarDate, direction);
+            vm.currentDate = getAdjacentCalendarDate(vm.currentDate, direction);
+
             refreshView(direction);
           }, 100);
         };
       }
 
 
+
+
+      // Used to get the "AdjacentCalendarDate"
+      // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
+      // => from the direction, add/substract one month to currentCalendarDate
+      // => TODO : should delete this function => no more currentCalendarDate/selectedDate
+      function getAdjacentCalendarDate(currentCalendarDate, direction) {
+        var calculateCalendarDate = new Date(currentCalendarDate),
+            year = calculateCalendarDate.getFullYear(),
+            month = calculateCalendarDate.getMonth() + direction,
+            date = calculateCalendarDate.getDate(),
+            firstDayInNextMonth;
+
+        calculateCalendarDate.setFullYear(year, month, date);
+
+        firstDayInNextMonth = new Date(year, month + 1, 1);
+        if (firstDayInNextMonth.getTime() <= calculateCalendarDate.getTime()) {
+          calculateCalendarDate = new Date(firstDayInNextMonth - 24 * 60 * 60 * 1000);
+        }
+
+        return calculateCalendarDate;
+      }
+
       // TODO => understand
-      // Called when changing the month
+      // Called after changing the month
       // direction -1 (gauche), +1(droite)
       refreshView();
       function refreshView(direction) {
-        // direction = typeof direction === 'undefined' ? 0 : direction;
+        vm.range = getRange(vm.currentDate);
 
+        refreshMonth();
+
+        populateAdjacentViews();
+
+        if (vm.queryMode === 'local') {
+          if ($scope.eventSource && onDataLoaded) {
+            onDataLoaded();
+          }
+        } else if (vm.queryMode === 'remote') {
+          if ($scope.rangeChanged) {
+            $scope.rangeChanged({
+              startTime: vm.range.startTime,
+              endTime: vm.range.endTime
+            });
+          }
+        }
+
+
+
+
+        // From one date
+        // => get the startDate and endDate of new view corresponding to the date
+        // => TODO => should change currentDate by currentMonth (but there is also the year...)
+        // function getRange(month, year) {
         function getRange(currentDate) {
-          var year = currentDate.getFullYear(),
-              month = currentDate.getMonth(),
-              firstDayOfMonth = new Date(year, month, 1),
-              difference = vm.startingDayMonth - firstDayOfMonth.getDay(),
-              numDisplayedFromPreviousMonth = (difference > 0) ? 7 - difference : -difference,
+          var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+              difference = vm.startingDayMonth - firstDayOfMonth.getDay(), // vm.startingDayMonth = 1 (Monday)  .getDay() = 0 (SUN) 1 (MON) 2 (TSU) ...
+              numDisplayedFromPreviousMonth = (difference > 0) ? 7 - difference : -difference, // number of days to display from previous month
               startDate = new Date(firstDayOfMonth),
               endDate;
 
@@ -209,9 +222,7 @@
           };
         }
 
-        vm.range = getRange(vm.currentCalendarDate);
 
-        refreshMonth();
         function refreshMonth(){
           var currentViewStartDate = vm.range.startTime,
               date = currentViewStartDate.getDate(),
@@ -222,35 +233,7 @@
           $scope.monthTitle.lapin = dateFilter(headerDate, vm.formatMonthTitle);
         }
 
-        populateAdjacentViews();
         function populateAdjacentViews() {
-
-          // Used to get an array of 42 days (7days * 6weeks)
-          // => used to display the current month
-          function getDates(startDate) {
-            var dates = new Array(42),
-                current = new Date(startDate);
-
-            current.setHours(12); // Prevent repeated dates because of timezone bug
-
-            for (var i = 0; i < dates.length; i++) {
-              dates[i] = {
-                date: new Date(current),
-                event: false
-              };
-              current.setDate(current.getDate() + 1);
-            }
-
-            return {
-              dates: dates
-            };
-          }
-
-          function getAdjacentViewStartTime(direction) {
-            var adjacentCalendarDate = getAdjacentCalendarDate(vm.currentCalendarDate, direction);
-            return getRange(adjacentCalendarDate).startTime;
-          }
-
           var currentViewStartDate,
               currentViewData,
               toUpdateViewIndex,
@@ -285,19 +268,55 @@
               angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
             }
           }
-        }
 
-        if (vm.queryMode === 'local') {
-          if ($scope.eventSource && onDataLoaded) {
-            onDataLoaded();
+
+          // Used to get an array of 42 days (7days * 6weeks)
+          // => used to display the current month
+          function getDates(startDate) {
+            var dates = new Array(42),
+                current = new Date(startDate);
+
+            current.setHours(12); // Prevent repeated dates because of timezone bug
+
+            for (var i = 0; i < dates.length; i++) {
+              dates[i] = {
+                date: new Date(current),
+                event: false
+              };
+              current.setDate(current.getDate() + 1);
+            }
+
+            return {
+              dates: dates
+            };
           }
-        } else if (vm.queryMode === 'remote') {
-          if ($scope.rangeChanged) {
-            $scope.rangeChanged({
-              startTime: vm.range.startTime,
-              endTime: vm.range.endTime
-            });
+
+
+          function getAdjacentViewStartTime(direction) {
+            var adjacentCalendarDate = getAdjacentCalendarDate(vm.currentDate, direction);
+            return getRange(adjacentCalendarDate).startTime;
           }
+
+          // function getAdjacentViewStartTime(direction) {
+          //   // Used to get the "AdjacentCalendarDate"
+          //   // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
+          //   // => from the direction, add/substract one month to currentCalendarDate
+          //   // => TODO : should delete this function => no more currentCalendarDate/selectedDate
+          //   var calculateCalendarDate = new Date(vm.currentDate),
+          //       year = calculateCalendarDate.getFullYear(),
+          //       month = calculateCalendarDate.getMonth() + direction,
+          //       date = calculateCalendarDate.getDate(),
+          //       firstDayInNextMonth;
+
+          //   calculateCalendarDate.setFullYear(year, month, date);
+
+          //   firstDayInNextMonth = new Date(year, month + 1, 1);
+          //   if (firstDayInNextMonth.getTime() <= calculateCalendarDate.getTime()) {
+          //     calculateCalendarDate = new Date(firstDayInNextMonth - 24 * 60 * 60 * 1000);
+          //   }
+
+          //   return getRange(calculateCalendarDate).startTime;
+          // }
         }
       }
     }
