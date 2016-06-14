@@ -1,3 +1,47 @@
 <div style="height: 100%;">
-  <month-view></month-view>
+    <ion-slide-box  on-slide-changed="slideChanged($index)"
+                    does-continue="true"
+                    show-pager="false"
+                    delegate-handle="monthview-slide"
+                    style="height: auto;">
+        <ion-slide ng-repeat="view in views track by $index">
+            <table ng-if="$index===currentViewIndex" class="table-bordered monthview-datetable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th ng-repeat="day in view.dates.slice(0,7) track by day.date">
+                            <small>{{::day.date | date: cc.formatDayHeader | uppercase}}</small>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="i in [0,1,2,3,4,5]">
+                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
+                        <td ng-repeat="j in [0,1,2,3,4,5,6]"
+                            ng-init="date = view.dates[7*i+j]"
+                            ng-click="select(date.date)"
+                            ng-class="{'monthview-secondary': date.events.length > 0 && date.secondary, 'monthview-primary': date.events.length > 0 && !date.secondary, 'monthview-current': (date.date | todayFilter), 'text-muted': date.secondary}">{{date.label}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table ng-if="$index!==currentViewIndex" class="table-bordered monthview-datetable">
+                <thead>
+                    <tr class="text-center">
+                        <th></th>
+                        <th ng-repeat="day in view.dates.slice(0,7) track by day.date">
+                            <small>{{::day.date | date: cc.formatDayHeader | uppercase}}</small>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="i in [0,1,2,3,4,5]">
+                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
+                        <td ng-repeat="j in [0,1,2,3,4,5,6]"
+                            ng-init="date = view.dates[7*i+j]"
+                            ng-class="{'monthview-secondary': date.events.length > 0 && date.secondary, 'monthview-primary': date.events.length > 0 && !date.secondary, 'monthview-current': (date.date | todayFilter), 'text-muted': date.secondary}">{{date.label}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </ion-slide>
+    </ion-slide-box>
 </div>

@@ -43,13 +43,21 @@ angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
     .controller('CalendarDemoCtrl', function ($scope) {
         'use strict';
         $scope.calendar = {};
+        $scope.calendar.eventSource = [];
 
         $scope.loadEvents = function () {
-            $scope.calendar.eventSource = createRandomEvents();
-        };
+            var events = [];
+            for (var i = 0; i < 50; i += 1) {
+                var date = new Date(),
+                    startDay = Math.floor(Math.random() * 90) - 45,
+                    startTime = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + startDay));
 
-        $scope.onEventSelected = function (event) {
-            console.log('Event selected:' + event.startTime + '-' + event.endTime + ',' + event.title);
+                events.push({
+                    startTime: startTime,
+                });
+
+            }
+            $scope.calendar.eventSource = events;
         };
 
         $scope.onViewTitleChanged = function (title) {
@@ -69,31 +77,35 @@ angular.module('calendarDemoApp', ['ionic', 'ngAnimate', 'calendar_pk'])
             return today.getTime() === currentCalendarDate.getTime();
         };
 
-        $scope.onTimeSelected = function (selectedTime) {
-            console.log('Selected time: ' + selectedTime);
+        function getEventIndex (events, time) {
+            var j = -1;
+
+            for (var i = 0; i < events.length; i++) {
+                if (events[i].startTime === time){
+                    var j = i;
+                    break;
+                }
+            }
+
+            return j;
         };
 
-        function createRandomEvents() {
-            var events = [];
-            for (var i = 0; i < 50; i += 1) {
-                var date = new Date();
-                var eventType = Math.floor(Math.random() * 2);
-                var startDay = Math.floor(Math.random() * 90) - 45;
-                var endDay = Math.floor(Math.random() * 2) + startDay;
+        // Called when clicking on a date
+        $scope.onTimeSelected = function (selectedTime) {
+            var eventSource = $scope.calendar.eventSource;
+            var lapin = {
+                startTime: selectedTime,
+                endTime: selectedTime,
+            };
 
-                var startTime = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + startDay));
-                if (endDay === startDay) {
-                    endDay += 1;
-                }
-                var endTime = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + endDay));
-                events.push({
-                    title: 'All Day - ' + i,
-                    startTime: startTime,
-                    endTime: endTime,
-                    allDay: true
-                });
+            var j = getEventIndex(eventSource, selectedTime)
 
+            if (j > -1) {
+                eventSource.splice(j, 1);
+            } else {
+                eventSource.push(lapin);
             }
-            return events;
-        }
+
+            console.log('Selected time: ' + selectedTime);
+        };
     });

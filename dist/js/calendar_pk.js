@@ -3,7 +3,6 @@
 
   angular.module('directives', []);
   angular.module('constants', []);
-  // angular.module('templates', []);
   angular.module('filters', []);
 
   var app = angular.module('calendar_pk', ['directives', 'constants', 'templates', 'filters']);
@@ -20,7 +19,6 @@
     formatMonthTitle: 'MMMM yyyy',
     eventSource: null,
     queryMode: 'local',
-    step: 30,
     startingDayMonth: 1,
   });
 
@@ -42,10 +40,10 @@
     directive.templateUrl = 'calendar.html';
 
     directive.scope = {
-      rangeChanged: '&',
-      eventSelected: '&',
-      timeSelected: '&',
-      titleChanged: '&'
+      rangeChanged:  '&', // Called when vm.queryMode === 'remote' and when changing the month
+      timeSelected:  '&', // Called when clicking on a date
+      titleChanged:  '&', // Called when changing the month (TODO => same time called with rangeChanged ? => fusion ?)
+      eventSource:   '=', // All the events => two way data binding
     };
 
     directive.require = ['calendar', '?^ngModel'];
@@ -61,46 +59,51 @@
       }
     }
 
-
+    directive.controllerAs = 'cc';
     directive.controller = CalendarController;
     CalendarController.$inject = ['$scope', '$attrs', '$parse', '$interpolate', 'calendarConfig', '$timeout', '$ionicSlideBoxDelegate', 'dateFilter'];
     function CalendarController($scope, $attrs, $parse, $interpolate, calendarConfig, $timeout, $ionicSlideBoxDelegate, dateFilter) {
       var vm = this;
 
-      console.log('$attrs', $attrs);
-
       var ngModelCtrl = {$setViewValue: angular.noop}; // nullModelCtrl;
 
-      // Configuration attributes
-      angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'eventSource', 'queryMode', 'step', 'startingDayMonth'], function (key, index) {
-        // vm[key] = angular.isDefined($attrs[key]) ? (index < 4 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : calendarConfig[key];
-        vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
-      });
+      $scope.$watch(function(){
+        return $scope.eventSource;
+      }, function (newVal, oldVal) {
+        vm.eventSource = newVal;
+        if (onDataLoaded) {
+          onDataLoaded();
+        }
+      }, true);
 
-      vm.hourParts = Math.floor(60 / vm.step);
+      init();
+      function init() {
+        // Configuration attributes
+        angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'queryMode', 'startingDayMonth'], function (key, index) {
+          // vm[key] = angular.isDefined($attrs[key]) ? (index < 4 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : calendarConfig[key];
+          vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
+        });
 
-      // Watch the scope of the parent scope
-      $scope.$parent.$watch($attrs.eventSource, function (value) {
-        vm.onEventSourceChanged(value);
-      });
+        if (angular.isDefined($attrs.initDate)) {
+          vm.currentCalendarDate = $scope.$parent.$eval($attrs.initDate);
+        }
 
-      if (angular.isDefined($attrs.initDate)) {
-        vm.currentCalendarDate = $scope.$parent.$eval($attrs.initDate);
-      }
-
-      if (!vm.currentCalendarDate) {
-        vm.currentCalendarDate = new Date();
-        if ($attrs.ngModel && !$scope.$parent.$eval($attrs.ngModel)) {
-          $parse($attrs.ngModel).assign($scope.$parent, vm.currentCalendarDate);
+        if (!vm.currentCalendarDate) {
+          vm.currentCalendarDate = new Date();
+          if ($attrs.ngModel && !$scope.$parent.$eval($attrs.ngModel)) {
+            $parse($attrs.ngModel).assign($scope.$parent, vm.currentCalendarDate);
+          }
         }
       }
 
+
+
+      // TODO => understand
       function getAdjacentCalendarDate(currentCalendarDate, direction) {
-        var step = vm.mode.step,
-            calculateCalendarDate = new Date(currentCalendarDate),
-            year = calculateCalendarDate.getFullYear() + direction * (step.years || 0),
-            month = calculateCalendarDate.getMonth() + direction * (step.months || 0),
-            date = calculateCalendarDate.getDate() + direction * (step.days || 0),
+        var calculateCalendarDate = new Date(currentCalendarDate),
+            year = calculateCalendarDate.getFullYear(),
+            month = calculateCalendarDate.getMonth() + direction,
+            date = calculateCalendarDate.getDate(),
             firstDayInNextMonth;
 
         calculateCalendarDate.setFullYear(year, month, date);
@@ -112,6 +115,7 @@
 
         return calculateCalendarDate;
       }
+
 
       function getViewData(startTime) {
         function getDates(startDate, n) {
@@ -146,6 +150,84 @@
         };
       }
 
+
+      // Called when changing the month
+      // TODO => change vm.direction (should use it as a parameter only and not a variable on vm)
+      vm.move = function (direction) {
+        vm.direction = direction;
+
+        vm.currentCalendarDate = getAdjacentCalendarDate(vm.currentCalendarDate, direction);
+
+        ngModelCtrl.$setViewValue(vm.currentCalendarDate);
+        vm.refreshView();
+
+        vm.direction = 0;
+      };
+
+      // Called when changing the month
+      // TODO => understand
+      vm.refreshView = function () {
+        vm.range = getRange(this.currentCalendarDate);
+        if ($scope.titleChanged) {
+          $scope.titleChanged({title: vm.getTitle()});
+        }
+
+        // => understand why it takes the scope as parameter
+        // vm.direction -1 (gauche), +1(droite), 0 (click on today)
+        populateAdjacentViews();
+        function populateAdjacentViews() {
+          var currentViewStartDate,
+              currentViewData,
+              toUpdateViewIndex,
+              currentViewIndex = $scope.currentViewIndex;
+
+          if (vm.direction === 1) {
+            currentViewStartDate = vm.getAdjacentViewStartTime(1);
+            toUpdateViewIndex = (currentViewIndex + 1) % 3;
+            angular.copy(getViewData(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+          } else if (vm.direction === -1) {
+            currentViewStartDate = vm.getAdjacentViewStartTime(-1);
+            toUpdateViewIndex = (currentViewIndex + 2) % 3;
+            angular.copy(getViewData(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+          } else {
+            if (!$scope.views) {
+              currentViewData = [];
+              currentViewStartDate = vm.range.startTime;
+              currentViewData.push(getViewData(currentViewStartDate));
+              currentViewStartDate = vm.getAdjacentViewStartTime(1);
+              currentViewData.push(getViewData(currentViewStartDate));
+              currentViewStartDate = vm.getAdjacentViewStartTime(-1);
+              currentViewData.push(getViewData(currentViewStartDate));
+              $scope.views = currentViewData;
+            } else {
+              currentViewStartDate = vm.range.startTime;
+              angular.copy(getViewData(currentViewStartDate), $scope.views[currentViewIndex]);
+              currentViewStartDate = vm.getAdjacentViewStartTime(-1);
+              toUpdateViewIndex = (currentViewIndex + 2) % 3;
+              angular.copy(getViewData(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+              currentViewStartDate = vm.getAdjacentViewStartTime(1);
+              toUpdateViewIndex = (currentViewIndex + 1) % 3;
+              angular.copy(getViewData(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+            }
+          }
+        }
+
+        if (vm.queryMode === 'local') {
+          if (vm.eventSource && onDataLoaded) {
+            onDataLoaded();
+          }
+        } else if (vm.queryMode === 'remote') {
+          if ($scope.rangeChanged) {
+            $scope.rangeChanged({
+              startTime: vm.range.startTime,
+              endTime: vm.range.endTime
+            });
+          }
+        }
+      };
+
+
+
       function getRange(currentDate) {
         var year = currentDate.getFullYear(),
             month = currentDate.getMonth(),
@@ -168,100 +250,32 @@
         };
       }
 
+      // DONE
       function onDataLoaded() {
-        var eventSource = vm.eventSource,
-            len = eventSource ? eventSource.length : 0,
-            startTime = vm.range.startTime,
-            endTime = vm.range.endTime,
-            timeZoneOffset = -new Date().getTimezoneOffset(),
-            utcStartTime = new Date(startTime.getTime() + timeZoneOffset * 60 * 1000),
-            utcEndTime = new Date(endTime.getTime() + timeZoneOffset * 60 * 1000),
-            currentViewIndex = scope.currentViewIndex,
-            dates = scope.views[currentViewIndex].dates,
-            oneDay = 86400000,
-            eps = 0.001;
+        var eventSource     = $scope.eventSource, // All the events
+            timeZoneOffset  = -new Date().getTimezoneOffset(),
+            utcStartTime    = new Date(vm.range.startTime.getTime() + timeZoneOffset * 60 * 1000), // StartTime of the month
+            utcEndTime      = new Date(vm.range.endTime.getTime() + timeZoneOffset * 60 * 1000), // EndTime of the month
+            dates           = $scope.views[$scope.currentViewIndex].dates; // All the dates of the current scope (42 dates)
 
-        for (var r = 0; r < 42; r += 1) {
-          if (dates[r].hasEvent) {
-            dates[r].hasEvent = false;
-            dates[r].events = [];
-          }
-        }
-
-        for (var i = 0; i < len; i += 1) {
+        // loop over all events
+        // => If eventDate is in the scope of the current view
+        //  => add the event to $scope.views[$scope.currentViewIndex].dates
+        for (var i = 0; i < eventSource.length; i += 1) {
           var event = eventSource[i],
-              eventStartTime = new Date(event.startTime),
-              eventEndTime = new Date(event.endTime),
-              st,
-              et;
+              eventDate = new Date(event.startTime);
 
-          if (event.allDay) {
-            if (eventEndTime <= utcStartTime || eventStartTime >= utcEndTime) {
-              continue;
-            } else {
-              st = utcStartTime;
-              et = utcEndTime;
-            }
-          } else {
-            if (eventEndTime <= startTime || eventStartTime >= endTime) {
-              continue;
-            } else {
-              st = startTime;
-              et = endTime;
-            }
-          }
-
-          var timeDifferenceStart;
-          if (eventStartTime <= st) {
-            timeDifferenceStart = 0;
-          } else {
-            timeDifferenceStart = (eventStartTime - st) / oneDay;
-          }
-
-          var timeDifferenceEnd;
-          if (eventEndTime >= et) {
-            timeDifferenceEnd = (et - st) / oneDay;
-          } else {
-            timeDifferenceEnd = (eventEndTime - st) / oneDay;
-          }
-
-          var index = Math.floor(timeDifferenceStart);
-          var eventSet;
-          while (index < timeDifferenceEnd - eps) {
-            dates[index].hasEvent = true;
-            eventSet = dates[index].events;
-            if (eventSet) {
-              eventSet.push(event);
-            } else {
-              eventSet = [];
-              eventSet.push(event);
-              dates[index].events = eventSet;
-            }
-            index += 1;
-          }
-        }
-
-        for (r = 0; r < 42; r += 1) {
-          if (dates[r].hasEvent) {
-            dates[r].events.sort(compareEvent);
-          }
-        }
-
-        var findSelected = false;
-        for (r = 0; r < 42; r += 1) {
-          if (dates[r].selected) {
-            scope.selectedDate = dates[r];
-            findSelected = true;
-            break;
-          }
-          if (findSelected) {
-            break;
+          if (utcStartTime <= eventDate && eventDate <= utcEndTime){
+            dates[Math.floor((eventDate - utcStartTime) / 86400000)].events = [event];
           }
         }
       }
 
 
 
+
+
+      // TODO => understand.
       vm.init = function (ngModelCtrl_) {
         ngModelCtrl = ngModelCtrl_;
 
@@ -282,64 +296,22 @@
           }
           ngModelCtrl.$setValidity('date', isValid);
         }
-        this.refreshView();
+        vm.refreshView();
       };
 
-      vm.refreshView = function () {
-        if (this.mode) {
-          this.range = getRange(this.currentCalendarDate);
-          if ($scope.titleChanged) {
-            $scope.titleChanged({title: vm.getTitle()});
-          }
-          this._refreshView();
-          this.rangeChanged();
-        }
-      };
-
-      vm.onEventSourceChanged = function (value) {
-        vm.eventSource = value;
-        if (onDataLoaded) {
-          onDataLoaded();
-        }
-      };
 
       vm.getAdjacentViewStartTime = function (direction) {
         var adjacentCalendarDate = getAdjacentCalendarDate(vm.currentCalendarDate, direction);
         return getRange(adjacentCalendarDate).startTime;
       };
 
-      vm.move = function (direction) {
-        vm.direction = direction;
-
-        vm.currentCalendarDate = getAdjacentCalendarDate(vm.currentCalendarDate, direction);
-
-        ngModelCtrl.$setViewValue(vm.currentCalendarDate);
-        vm.refreshView();
-        vm.direction = 0;
-      };
-
-      vm.rangeChanged = function () {
-        if (vm.queryMode === 'local') {
-          if (vm.eventSource && onDataLoaded) {
-            onDataLoaded();
-          }
-        } else if (vm.queryMode === 'remote') {
-          if ($scope.rangeChanged) {
-            $scope.rangeChanged({
-              startTime: this.range.startTime,
-              endTime: this.range.endTime
-            });
-          }
-        }
-      };
-
       // TODO
       // => understand what is $index and what is currentViewIndex
-      vm.registerSlideChanged = function (scope) {
-        scope.currentViewIndex = 0;
-        scope.slideChanged = function ($index) {
+      vm.registerSlideChanged = function () {
+        $scope.currentViewIndex = 0;
+        $scope.slideChanged = function ($index) {
           $timeout(function () {
-            var currentViewIndex = scope.currentViewIndex,
+            var currentViewIndex = $scope.currentViewIndex,
                 direction = 0;
 
             console.log('currentViewIndex', currentViewIndex);
@@ -351,48 +323,11 @@
               direction = -1;
             }
 
-            scope.currentViewIndex = $index;
+            $scope.currentViewIndex = $index;
             vm.move(direction);
-            scope.$digest();
+            $scope.$digest();
           }, 100);
         };
-      };
-
-      vm.populateAdjacentViews = function (scope) {
-        var currentViewStartDate,
-            currentViewData,
-            toUpdateViewIndex,
-            currentViewIndex = scope.currentViewIndex;
-
-        if (vm.direction === 1) {
-          currentViewStartDate = vm.getAdjacentViewStartTime(1);
-          toUpdateViewIndex = (currentViewIndex + 1) % 3;
-          angular.copy(getViewData(currentViewStartDate), scope.views[toUpdateViewIndex]);
-        } else if (vm.direction === -1) {
-          currentViewStartDate = vm.getAdjacentViewStartTime(-1);
-          toUpdateViewIndex = (currentViewIndex + 2) % 3;
-          angular.copy(getViewData(currentViewStartDate), scope.views[toUpdateViewIndex]);
-        } else {
-          if (!scope.views) {
-            currentViewData = [];
-            currentViewStartDate = vm.range.startTime;
-            currentViewData.push(getViewData(currentViewStartDate));
-            currentViewStartDate = vm.getAdjacentViewStartTime(1);
-            currentViewData.push(getViewData(currentViewStartDate));
-            currentViewStartDate = vm.getAdjacentViewStartTime(-1);
-            currentViewData.push(getViewData(currentViewStartDate));
-            scope.views = currentViewData;
-          } else {
-            currentViewStartDate = vm.range.startTime;
-            angular.copy(getViewData(currentViewStartDate), scope.views[currentViewIndex]);
-            currentViewStartDate = vm.getAdjacentViewStartTime(-1);
-            toUpdateViewIndex = (currentViewIndex + 2) % 3;
-            angular.copy(getViewData(currentViewStartDate), scope.views[toUpdateViewIndex]);
-            currentViewStartDate = vm.getAdjacentViewStartTime(1);
-            toUpdateViewIndex = (currentViewIndex + 1) % 3;
-            angular.copy(getViewData(currentViewStartDate), scope.views[toUpdateViewIndex]);
-          }
-        }
       };
 
       vm.getTitle = function () {
@@ -404,6 +339,18 @@
 
         return dateFilter(headerDate, vm.formatMonthTitle);
       };
+
+
+      // Triggered on ng-click when clicking on a date
+      $scope.select = function (selectedDate) {
+        if ($scope.views && $scope.timeSelected) {
+          $scope.timeSelected({selectedTime: selectedDate});
+        }
+      };
+
+
+      vm.registerSlideChanged();
+      vm.refreshView();
     }
 
     return directive;
@@ -412,148 +359,18 @@
 })();
 
 (function() {
-  'use strict';
+  angular.module('filters')
+    .filter('todayFilter', todayFilter);
 
-  angular.module('directives')
-    .directive('monthView', monthView);
+  todayFilter.$inject = [];
 
-  monthView.$inject = [];
-  function monthView() {
-    var directive = {};
+  function todayFilter() {
+    return function (date) {
+      date = new Date(+date);
+      var today = new Date();
 
-    directive.restrict = 'E';
-    directive.replace = true;
-    directive.templateUrl = 'month-view.html';
-    directive.require = ['^calendar', '?^ngModel'];
-
-    directive.link = monthViewLink;
-
-    monthViewLink.$inject = [];
-    function monthViewLink(scope, element, attrs, ctrls) {
-
-      var ctrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-
-      scope.formatDayHeader = ctrl.formatDayHeader;
-
-      ctrl.mode = {
-        step: {months: 1}
-      };
-
-      function updateCurrentView(currentViewStartDate, view) {
-        var currentCalendarDate = ctrl.currentCalendarDate,
-            today = new Date(),
-            oneDay = 86400000,
-            selectedDayDifference = Math.floor((currentCalendarDate.getTime() - currentViewStartDate.getTime()) / oneDay),
-            currentDayDifference = Math.floor((today.getTime() - currentViewStartDate.getTime()) / oneDay);
-
-        for (var r = 0; r < 42; r += 1) {
-          view.dates[r].selected = false;
-        }
-
-        if (selectedDayDifference >= 0 && selectedDayDifference < 42) {
-          view.dates[selectedDayDifference].selected = true;
-          scope.selectedDate = view.dates[selectedDayDifference];
-        } else {
-          scope.selectedDate = {
-            events: []
-          };
-        }
-
-        if (currentDayDifference >= 0 && currentDayDifference < 42) {
-          view.dates[currentDayDifference].current = true;
-        }
-      }
-
-      function compareEvent(event1, event2) {
-        if (event1.allDay) {
-          return 1;
-        } else if (event2.allDay) {
-          return -1;
-        } else {
-          return (event1.startTime.getTime() - event2.startTime.getTime());
-        }
-      }
-
-      scope.select = function (selectedDate) {
-        var views = scope.views,
-            dates,
-            r;
-
-        if (views) {
-          dates = views[scope.currentViewIndex].dates;
-          var currentCalendarDate = ctrl.currentCalendarDate;
-
-          ctrl.currentCalendarDate = selectedDate;
-
-          var currentViewStartDate = ctrl.range.startTime,
-            oneDay = 86400000,
-            selectedDayDifference = Math.floor((selectedDate.getTime() - currentViewStartDate.getTime()) / oneDay);
-          for (r = 0; r < 42; r += 1) {
-            dates[r].selected = false;
-          }
-
-          if (selectedDayDifference >= 0 && selectedDayDifference < 42) {
-            dates[selectedDayDifference].selected = true;
-            scope.selectedDate = dates[selectedDayDifference];
-          }
-
-
-          if (scope.timeSelected) {
-            scope.timeSelected({selectedTime: selectedDate});
-          }
-        }
-      };
-
-      // Used to the the class depending of the event/month
-      scope.getHighlightClass = function (date) {
-        var className = '';
-
-        // if has an event
-        if (date.hasEvent) {
-          className = date.secondary ? 'monthview-secondary' : 'monthview-primary';
-          className += ' ';
-        }
-
-        // Selected date
-        if (date.selected) {
-          className += 'monthview-selected';
-          className += ' ';
-        }
-
-        // Today date
-        if (date.current) {
-          className += 'monthview-current';
-          className += ' ';
-        }
-
-        // From an other month
-        if (date.secondary) {
-          className += 'text-muted';
-          className += ' ';
-        }
-        className = className.slice(0, -1);
-        return className;
-      };
-
-
-
-
-
-      ctrl._refreshView = function () {
-        ctrl.populateAdjacentViews(scope);
-        updateCurrentView(ctrl.range.startTime, scope.views[scope.currentViewIndex]);
-      };
-
-
-
-
-      ctrl.registerSlideChanged(scope);
-
-      ctrl.refreshView();
-    }
-
-    return directive;
+      return (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear());
+    };
 
   }
 })();
@@ -585,11 +402,6 @@
 angular.module('templates', []).run(['$templateCache', function($templateCache) {
   $templateCache.put("calendar.html",
     "<div style=\"height: 100%;\">\n" +
-    "  <month-view></month-view>\n" +
-    "</div>\n" +
-    "");
-  $templateCache.put("month-view.html",
-    "<div>\n" +
     "    <ion-slide-box  on-slide-changed=\"slideChanged($index)\"\n" +
     "                    does-continue=\"true\"\n" +
     "                    show-pager=\"false\"\n" +
@@ -601,7 +413,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    <tr>\n" +
     "                        <th></th>\n" +
     "                        <th ng-repeat=\"day in view.dates.slice(0,7) track by day.date\">\n" +
-    "                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>\n" +
+    "                            <small>{{::day.date | date: cc.formatDayHeader | uppercase}}</small>\n" +
     "                        </th>\n" +
     "                    </tr>\n" +
     "                </thead>\n" +
@@ -609,8 +421,9 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
     "                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
     "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
-    "                            ng-click=\"select(view.dates[7*i+j].date)\"\n" +
-    "                            ng-class=\"getHighlightClass(view.dates[7*i+j])\">{{view.dates[7*i+j].label}}</td>\n" +
+    "                            ng-init=\"date = view.dates[7*i+j]\"\n" +
+    "                            ng-click=\"select(date.date)\"\n" +
+    "                            ng-class=\"{'monthview-secondary': date.events.length > 0 && date.secondary, 'monthview-primary': date.events.length > 0 && !date.secondary, 'monthview-current': (date.date | todayFilter), 'text-muted': date.secondary}\">{{date.label}}</td>\n" +
     "                    </tr>\n" +
     "                </tbody>\n" +
     "            </table>\n" +
@@ -619,14 +432,16 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    <tr class=\"text-center\">\n" +
     "                        <th></th>\n" +
     "                        <th ng-repeat=\"day in view.dates.slice(0,7) track by day.date\">\n" +
-    "                            <small>{{::day.date | date: formatDayHeader | uppercase}}</small>\n" +
+    "                            <small>{{::day.date | date: cc.formatDayHeader | uppercase}}</small>\n" +
     "                        </th>\n" +
     "                    </tr>\n" +
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
     "                        <td>SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
-    "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\">{{view.dates[7*i+j].label}}</td>\n" +
+    "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
+    "                            ng-init=\"date = view.dates[7*i+j]\"\n" +
+    "                            ng-class=\"{'monthview-secondary': date.events.length > 0 && date.secondary, 'monthview-primary': date.events.length > 0 && !date.secondary, 'monthview-current': (date.date | todayFilter), 'text-muted': date.secondary}\">{{date.label}}</td>\n" +
     "                    </tr>\n" +
     "                </tbody>\n" +
     "            </table>\n" +

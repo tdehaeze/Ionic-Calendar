@@ -8,7 +8,6 @@
     formatMonthTitle: 'MMMM yyyy',
     eventSource: null,
     queryMode: 'local',
-    step: 30,
     startingDayMonth: 1,
   });
 

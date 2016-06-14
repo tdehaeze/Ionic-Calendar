@@ -44,14 +44,11 @@
                 </ion-nav-buttons>
 
                 <ion-content scroll="false" class="main-content">
+                    <!-- TODO => change ng-model to current-date -->
                     <calendar   ng-model="calendar.currentDate"
-                                calendar-mode="calendar.mode"
                                 event-source="calendar.eventSource"
-                                range-changed="reloadSource(startTime, endTime)"
-                                event-selected="onEventSelected(event)"
                                 title-changed="onViewTitleChanged(title)"
-                                time-selected="onTimeSelected(selectedTime)"
-                                step="15"></calendar>
+                                time-selected="onTimeSelected(selectedTime)"></calendar>
                     <!-- <calendar   ng-model="calendar.currentDate"
                                 calendar-mode="calendar.mode"
                                 event-source="calendar.eventSource"
