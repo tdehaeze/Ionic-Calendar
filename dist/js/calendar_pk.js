@@ -17,8 +17,7 @@
     formatDay:        'dd',         //
     formatDayHeader:  'EEE',        //
     formatMonthTitle: 'MMMM yyyy',  //
-    eventSource:      null,         //
-    queryMode:        'local',      //
+    eventSource:      [],           //
     startingDayMonth: 1,            //
   });
 
@@ -40,22 +39,20 @@
     directive.templateUrl = 'calendar.html';
 
     directive.scope = {
-      rangeChanged:  '&', // Called when vm.queryMode === 'remote' and when changing the month
-      timeSelected:  '&', // Called when clicking on a date
-      titleChanged:  '&', // Called when changing the month (TODO => same time called with rangeChanged ? => fusion ?)
-      eventSource:   '=', // All the events => two way data binding
-      monthTitle:    '=', //
+      monthChanged: '&', // Called when changing the month
+      timeSelected: '&', // Called when clicking on a date
+      weekSelected: '&', // Called when clicking on a week
+      eventSource:  '=', // All the events => two way data binding
     };
 
-    directive.require = ['calendar', '?^ngModel'];
+    // directive.require = ['calendar', '?^ngModel'];
 
     directive.controllerAs = 'cc';
     directive.controller = CalendarController;
-    CalendarController.$inject = ['$scope', '$attrs', '$interpolate', 'calendarConfig', '$timeout', 'dateFilter'];
-    function CalendarController($scope, $attrs, $interpolate, calendarConfig, $timeout, dateFilter) {
+    CalendarController.$inject = ['$scope', '$attrs', '$interpolate', 'calendarConfig', '$timeout', '$filter'];
+    function CalendarController($scope, $attrs, $interpolate, calendarConfig, $timeout, $filter) {
       var vm = this;
 
-      // TODO
       $scope.$watch(function(){
         return $scope.eventSource;
       }, function (newVal, oldVal) {
@@ -65,7 +62,7 @@
       init();
       function init() {
         // Configuration attributes
-        angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'queryMode', 'startingDayMonth'], function (key, index) {
+        angular.forEach(['formatDay', 'formatDayHeader', 'formatMonthTitle', 'startingDayMonth'], function (key, index) {
           vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
         });
 
@@ -74,23 +71,21 @@
         refreshView();
       }
 
-      // DONE
       // Triggered on ng-click when clicking on a date
       // => Call the function timeSelected passed to the directive
       vm.dayClick = function (selectedTime){
         toogle(selectedTime);
 
-        if ($scope.views && $scope.timeSelected) {
+        if ($scope.timeSelected) {
           $scope.timeSelected({selectedTime: selectedTime});
         }
       };
 
-      // DONE
       // Called when clicking on a week
       // => toogle all the week depending if they were all selected
       vm.weekClick = function(date_index) {
         var all_selected = isAllWeekSelected(date_index),
-            dates = $scope.views[vm.currentViewIndex].dates;
+            dates = vm.views[vm.currentViewIndex].dates;
 
         for (var i = 0; i < 7; i++) {
           if (all_selected) {
@@ -98,6 +93,11 @@
           } else if (!all_selected && !dates[date_index + i].event) {
             toogle(dates[date_index + i].date);
           }
+        }
+
+        if ($scope.weekSelected) {
+          var monday = dates[date_index].date;
+          $scope.weekSelected({monday: monday});
         }
       };
 
@@ -123,13 +123,18 @@
         }, 100);
       };
 
+
+
+
+
+
       // DONE
       function onDataLoaded() {
         var eventSource     = $scope.eventSource, // All the events
             timeZoneOffset  = -new Date().getTimezoneOffset(),
             utcStartTime    = new Date(vm.range.startTime.getTime() + timeZoneOffset * 60 * 1000), // StartTime of the month
             utcEndTime      = new Date(vm.range.endTime.getTime() + timeZoneOffset * 60 * 1000), // EndTime of the month
-            dates           = $scope.views[vm.currentViewIndex].dates; // All the dates of the current scope (42 dates)
+            dates           = vm.views[vm.currentViewIndex].dates; // All the dates of the current scope (42 dates)
 
         // Reset
         for (var r = 0; r < 42; r += 1) {
@@ -138,7 +143,7 @@
 
         // loop over all events
         // => If eventDate is in the scope of the current view
-        //  => add the event to $scope.views[vm.currentViewIndex].dates
+        //  => add the event to vm.views[vm.currentViewIndex].dates
         for (var i = 0; i < eventSource.length; i += 1) {
           var eventDate = new Date(eventSource[i]);
 
@@ -182,7 +187,7 @@
       // DONE
       // Used to get if all the week is selected
       function isAllWeekSelected (date_index){
-        var dates = $scope.views[vm.currentViewIndex].dates,
+        var dates = vm.views[vm.currentViewIndex].dates,
             all_selected = true;
 
         for (var i = 0; i < 7; i++) {
@@ -194,9 +199,6 @@
 
         return all_selected;
       }
-
-
-
 
       // Used to get the "AdjacentCalendarDate"
       // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
@@ -219,7 +221,6 @@
       }
 
 
-
       // TODO => understand
       // Called after changing the month
       // direction -1 (gauche), +1(droite)
@@ -230,17 +231,9 @@
 
         populateAdjacentViews();
 
-        if (vm.queryMode === 'local') {
-          if ($scope.eventSource) {
-            onDataLoaded();
-          }
-        } else if (vm.queryMode === 'remote') {
-          if ($scope.rangeChanged) {
-            $scope.rangeChanged({
-              startTime: vm.range.startTime,
-              endTime: vm.range.endTime
-            });
-          }
+
+        if ($scope.eventSource) {
+          onDataLoaded();
         }
 
         // From one date
@@ -265,13 +258,22 @@
           };
         }
 
-        // Used to refresh the monthTitle
+        // Used to refresh the month
         function refreshMonth(){
           var currentViewStartDate = new Date(vm.range.startTime);
 
           currentViewStartDate.setDate(currentViewStartDate.getDate() + 10);
 
-          $scope.monthTitle.lapin = dateFilter(currentViewStartDate, vm.formatMonthTitle); // TODO => change lapin
+          // $scope.currentMonth.date = currentViewStartDate;
+          // $scope.currentMonth.display = $filter('date')(currentViewStartDate, vm.formatMonthTitle);
+
+          if ($scope.monthChanged) {
+            $scope.monthChanged({
+              startTime: vm.range.startTime,
+              endTime: vm.range.endTime,
+              display: $filter('date')(currentViewStartDate, vm.formatMonthTitle)
+            });
+          }
         }
 
         function populateAdjacentViews() {
@@ -283,13 +285,13 @@
           if (direction === 1) { // next month
             currentViewStartDate = getAdjacentViewStartTime(direction);
             toUpdateViewIndex = (currentViewIndex + 1) % 3;
-            angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+            angular.copy(getDates(currentViewStartDate), vm.views[toUpdateViewIndex]);
           } else if (direction === -1) { // previous month
             currentViewStartDate = getAdjacentViewStartTime(direction);
             toUpdateViewIndex = (currentViewIndex + 2) % 3;
-            angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+            angular.copy(getDates(currentViewStartDate), vm.views[toUpdateViewIndex]);
           } else {
-            if (!$scope.views) {
+            if (!vm.views) {
               currentViewData = [];
               currentViewStartDate = vm.range.startTime;
               currentViewData.push(getDates(currentViewStartDate));
@@ -297,16 +299,16 @@
               currentViewData.push(getDates(currentViewStartDate));
               currentViewStartDate = getAdjacentViewStartTime(-1);
               currentViewData.push(getDates(currentViewStartDate));
-              $scope.views = currentViewData;
+              vm.views = currentViewData;
             } else {
               currentViewStartDate = vm.range.startTime;
-              angular.copy(getDates(currentViewStartDate), $scope.views[currentViewIndex]);
+              angular.copy(getDates(currentViewStartDate), vm.views[currentViewIndex]);
               currentViewStartDate = getAdjacentViewStartTime(-1);
               toUpdateViewIndex = (currentViewIndex + 2) % 3;
-              angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+              angular.copy(getDates(currentViewStartDate), vm.views[toUpdateViewIndex]);
               currentViewStartDate = getAdjacentViewStartTime(1);
               toUpdateViewIndex = (currentViewIndex + 1) % 3;
-              angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
+              angular.copy(getDates(currentViewStartDate), vm.views[toUpdateViewIndex]);
             }
           }
 
@@ -401,27 +403,6 @@
 })();
 
 (function() {
-  angular.module('filters')
-    .filter('weekNumber', weekNumber);
-
-  weekNumber.$inject = [];
-
-  function weekNumber() {
-    return function (date) {
-      date = new Date(+date);
-      date.setHours(0, 0, 0, 0);
-      // Thursday in current week decides the year.
-      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-      // January 4 is always in week 1.
-      var week1 = new Date(date.getFullYear(), 0, 4);
-      // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-      return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    };
-
-  }
-})();
-
-(function() {
 'use strict';
 
 angular.module('templates', []).run(['$templateCache', function($templateCache) {
@@ -432,7 +413,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    show-pager=\"false\"\n" +
     "                    delegate-handle=\"monthview-slide\"\n" +
     "                    style=\"height: auto;\">\n" +
-    "        <ion-slide ng-repeat=\"view in views track by $index\">\n" +
+    "        <ion-slide ng-repeat=\"view in cc.views track by $index\">\n" +
     "            <table ng-if=\"$index === cc.currentViewIndex\" class=\"table-bordered monthview-datetable\">\n" +
     "                <thead>\n" +
     "                    <tr>\n" +
@@ -444,7 +425,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
-    "                        <td ng-click=\"cc.weekClick(7*i)\">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
+    "                        <td ng-click=\"cc.weekClick(7*i)\">SEM<br>{{view.dates[7*i].date | date : 'w'}}</td>\n" +
     "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
     "                            ng-init=\"date = view.dates[7*i+j]\"\n" +
     "                            ng-click=\"cc.dayClick(date.date)\"\n" +
@@ -463,10 +444,8 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
-    "                        <td ng-click=\"\">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
-    "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
-    "                            ng-init=\"date = view.dates[7*i+j]\"\n" +
-    "                            ng-class=\"{'monthview-secondary': date.event && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.event && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}\">{{date.date | date : cc.formatDay}}</td>\n" +
+    "                        <td>SEM<br>{{view.dates[7*i].date | date : 'w'}}</td>\n" +
+    "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\">{{view.dates[7*i+j].date | date : cc.formatDay}}</td>\n" +
     "                    </tr>\n" +
     "                </tbody>\n" +
     "            </table>\n" +

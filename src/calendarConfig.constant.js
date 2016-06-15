@@ -6,8 +6,7 @@
     formatDay:        'dd',         //
     formatDayHeader:  'EEE',        //
     formatMonthTitle: 'MMMM yyyy',  //
-    eventSource:      null,         //
-    queryMode:        'local',      //
+    eventSource:      [],           //
     startingDayMonth: 1,            //
   });
 

@@ -4,7 +4,7 @@
                     show-pager="false"
                     delegate-handle="monthview-slide"
                     style="height: auto;">
-        <ion-slide ng-repeat="view in views track by $index">
+        <ion-slide ng-repeat="view in cc.views track by $index">
             <table ng-if="$index === cc.currentViewIndex" class="table-bordered monthview-datetable">
                 <thead>
                     <tr>
@@ -16,7 +16,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="i in [0,1,2,3,4,5]">
-                        <td ng-click="cc.weekClick(7*i)">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
+                        <td ng-click="cc.weekClick(7*i)">SEM<br>{{view.dates[7*i].date | date : 'w'}}</td>
                         <td ng-repeat="j in [0,1,2,3,4,5,6]"
                             ng-init="date = view.dates[7*i+j]"
                             ng-click="cc.dayClick(date.date)"
@@ -35,10 +35,8 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="i in [0,1,2,3,4,5]">
-                        <td ng-click="">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
-                        <td ng-repeat="j in [0,1,2,3,4,5,6]"
-                            ng-init="date = view.dates[7*i+j]"
-                            ng-class="{'monthview-secondary': date.event && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.event && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}">{{date.date | date : cc.formatDay}}</td>
+                        <td>SEM<br>{{view.dates[7*i].date | date : 'w'}}</td>
+                        <td ng-repeat="j in [0,1,2,3,4,5,6]">{{view.dates[7*i+j].date | date : cc.formatDay}}</td>
                     </tr>
                 </tbody>
             </table>

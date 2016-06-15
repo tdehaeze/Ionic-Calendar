@@ -37,26 +37,16 @@
         </script>
 
         <script id="templates/home.html" type="text/ng-template">
-            <ion-view view-title={{viewTitle.lapin}}>
+            <ion-view view-title={{currentMonth.display}}>
                 <ion-nav-buttons side="right">
                     <button class="button" ng-click="loadEvents()">Load Events</button>
                 </ion-nav-buttons>
 
                 <ion-content scroll="false" class="main-content">
-                    <!-- TODO => change ng-model to current-date -->
-                    <calendar   ng-model="calendar.currentDate"
-                                event-source="calendar.eventSource"
-                                title-changed="onViewTitleChanged(title)"
+                    <calendar   event-source="eventSource"
+                                month-changed="onMonthChanged(startTime, endTime, display)"
                                 time-selected="onTimeSelected(selectedTime)"
-                                month-Title="viewTitle"></calendar>
-                    <!-- <calendar   ng-model="calendar.currentDate"
-                                calendar-mode="calendar.mode"
-                                event-source="calendar.eventSource"
-                                range-changed="reloadSource(startTime, endTime)"
-                                event-selected="onEventSelected(event)"
-                                title-changed="onViewTitleChanged(title)"
-                                time-selected="onTimeSelected(selectedTime)"
-                                step="15"></calendar> -->
+                                week-selected="onWeekSelected(monday)"></calendar>
                 </ion-content>
             </ion-view>
         </script>

@@ -58,17 +58,10 @@
     angular.module('calendarDemoApp')
     .controller('CalendarDemoCtrl', CalendarDemoCtrl);
 
-    CalendarDemoCtrl.$inject = ['$scope'];
-    function CalendarDemoCtrl($scope) {
-        $scope.calendar = {};
-        $scope.calendar.eventSource = [];
-        $scope.viewTitle = {};
-
-        function uniq(a) {
-            return a.sort().filter(function(item, pos, ary) {
-                return !pos || item != ary[pos - 1];
-            })
-        }
+    CalendarDemoCtrl.$inject = ['$scope', '$filter'];
+    function CalendarDemoCtrl($scope, $filter) {
+        $scope.eventSource = [];
+        $scope.currentMonth = {};
 
         $scope.loadEvents = function () {
             var events = [];
@@ -79,17 +72,21 @@
 
                 events.push(startTime);
             }
-            // events = uniq(events);
-            $scope.calendar.eventSource = events;
+            $scope.eventSource = events;
         };
 
-        $scope.onViewTitleChanged = function (title) {
-            $scope.viewTitle = title;
+        $scope.onMonthChanged = function (startTime, endTime, display) {
+            console.log('Changed month : ' + display);
         };
 
         // Called when clicking on a date
         $scope.onTimeSelected = function (selectedTime) {
-            console.log('Selected time: ' + selectedTime);
+            console.log('Selected time: ' + $filter('date')(selectedTime, 'longDate'));
+        };
+
+        // Called when clicking on a week
+        $scope.onWeekSelected = function (monday) {
+            console.log('Selected week: week n°' + $filter('date')(monday, 'w') + ' of ' + monday.getFullYear());
         };
     }
 })();
