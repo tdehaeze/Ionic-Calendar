@@ -100,29 +100,34 @@
         }
       }
 
+
+
       // DONE
-      // Used to toogle one date
-      function toogle(selectedTime){
-        function getEventIndex (events, time) {
-          var j = -1;
+      // From one time, get the corresponding index of the eventSource array
+      // Used to know if there is a Event at the same date
+      function getEventIndex (time){
+        var j = -1,
+            eventSource = $scope.eventSource;
 
-          for (var i = 0; i < events.length; i++) {
-            var eventTime = events[i].startTime;
-            if (eventTime.getDate() === time.getDate() && eventTime.getMonth() === time.getMonth() && eventTime.getFullYear() === time.getFullYear()){
-                j = i;
-                break;
-            }
+        for (var i = 0; i < eventSource.length; i++) {
+          var eventTime = eventSource[i].startTime;
+          if (eventTime.getDate() === time.getDate() && eventTime.getMonth() === time.getMonth() && eventTime.getFullYear() === time.getFullYear()){
+              j = i;
+              break;
           }
-
-          return j;
         }
 
+        return j;
+      }
+
+      // DONE
+      // Used to toogle one date
+      function toogle (selectedTime){
         var eventSource = $scope.eventSource;
         var event = {
           startTime: selectedTime
         };
-
-        var index = getEventIndex(eventSource, selectedTime);
+        var index = getEventIndex(selectedTime);
 
         if (index > -1) {
           eventSource.splice(index, 1);
@@ -134,7 +139,7 @@
       // DONE
       // Triggered on ng-click when clicking on a date
       // => Call the function timeSelected passed to the directive
-      $scope.select = function (selectedTime) {
+      $scope.select = function (selectedTime){
         toogle(selectedTime);
 
         if ($scope.views && $scope.timeSelected) {
@@ -142,6 +147,36 @@
         }
       };
 
+      // DONE
+      // Used to get if all the week is selected
+      function isAllWeekSelected (date_index){
+        var dates = $scope.views[$scope.currentViewIndex].dates,
+            all_selected = true;
+
+        for (var i = 0; i < 7; i++) {
+          if (getEventIndex(dates[date_index + i].date) === -1) {
+            all_selected = false;
+            break;
+          }
+        }
+
+        return all_selected;
+      }
+
+      // Called when clicking on a week
+      vm.weekClick = function(date_index) {
+        var all_selected = isAllWeekSelected(date_index),
+            dates = $scope.views[$scope.currentViewIndex].dates;
+
+        for (var i = 0; i < 7; i++) {
+          if (all_selected) {
+            toogle(dates[date_index + i].date);
+          } else if (!all_selected && dates[date_index + i].events.length === 0) {
+            toogle(dates[date_index + i].date);
+          }
+        }
+
+      };
 
 
       // DONE
@@ -179,7 +214,6 @@
       // Used to get the "AdjacentCalendarDate"
       // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
       // => from the direction, add/substract one month to currentCalendarDate
-      // => TODO : should delete this function => no more currentCalendarDate/selectedDate
       function getAdjacentCalendarDate(currentCalendarDate, direction) {
         var calculateCalendarDate = new Date(currentCalendarDate),
             year = calculateCalendarDate.getFullYear(),
@@ -196,6 +230,7 @@
 
         return calculateCalendarDate;
       }
+
 
       // TODO => understand
       // Called after changing the month
@@ -226,10 +261,8 @@
 
         // From one date
         // => get the startDate and endDate of new view corresponding to the date
-        // => TODO => should change currentDate by currentMonth (but there is also the year...)
-        // function getRange(month, year) {
-        function getRange(currentDate) {
-          var firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+        function getRange(date) {
+          var firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1),
               difference = vm.startingDayMonth - firstDayOfMonth.getDay(), // vm.startingDayMonth = 1 (Monday)  .getDay() = 0 (SUN) 1 (MON) 2 (TSU) ...
               numDisplayedFromPreviousMonth = (difference > 0) ? 7 - difference : -difference, // number of days to display from previous month
               startDate = new Date(firstDayOfMonth),
@@ -248,15 +281,13 @@
           };
         }
 
-
+        // Used to refresh the monthTitle
         function refreshMonth(){
-          var currentViewStartDate = vm.range.startTime,
-              date = currentViewStartDate.getDate(),
-              month = (currentViewStartDate.getMonth() + (date !== 1 ? 1 : 0)) % 12,
-              year = currentViewStartDate.getFullYear() + (date !== 1 && month === 0 ? 1 : 0),
-              headerDate = new Date(year, month, 1);
+          var currentViewStartDate = new Date(vm.range.startTime);
 
-          $scope.monthTitle.lapin = dateFilter(headerDate, vm.formatMonthTitle);
+          currentViewStartDate.setDate(currentViewStartDate.getDate() + 10);
+
+          $scope.monthTitle.lapin = dateFilter(currentViewStartDate, vm.formatMonthTitle); // TODO => change lapin
         }
 
         function populateAdjacentViews() {
@@ -265,11 +296,11 @@
               toUpdateViewIndex,
               currentViewIndex = $scope.currentViewIndex;
 
-          if (direction === 1) {
+          if (direction === 1) { // next month
             currentViewStartDate = getAdjacentViewStartTime(direction);
             toUpdateViewIndex = (currentViewIndex + 1) % 3;
             angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
-          } else if (direction === -1) {
+          } else if (direction === -1) { // previous month
             currentViewStartDate = getAdjacentViewStartTime(direction);
             toUpdateViewIndex = (currentViewIndex + 2) % 3;
             angular.copy(getDates(currentViewStartDate), $scope.views[toUpdateViewIndex]);
@@ -317,7 +348,7 @@
             };
           }
 
-
+          // Used to get the startTime of the view corresponding to the direction and the currentDate
           function getAdjacentViewStartTime(direction) {
             var adjacentCalendarDate = getAdjacentCalendarDate(vm.currentDate, direction);
             return getRange(adjacentCalendarDate).startTime;
@@ -429,7 +460,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                </thead>\n" +
     "                <tbody>\n" +
     "                    <tr ng-repeat=\"i in [0,1,2,3,4,5]\">\n" +
-    "                        <td ng-click=\"\">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
+    "                        <td ng-click=\"cc.weekClick(7*i)\">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>\n" +
     "                        <td ng-repeat=\"j in [0,1,2,3,4,5,6]\"\n" +
     "                            ng-init=\"date = view.dates[7*i+j]\"\n" +
     "                            ng-click=\"select(date.date)\"\n" +

@@ -16,7 +16,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="i in [0,1,2,3,4,5]">
-                        <td ng-click="">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
+                        <td ng-click="cc.weekClick(7*i)">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
                         <td ng-repeat="j in [0,1,2,3,4,5,6]"
                             ng-init="date = view.dates[7*i+j]"
                             ng-click="select(date.date)"
