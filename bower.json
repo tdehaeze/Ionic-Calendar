@@ -1,6 +1,6 @@
 {
-  "name": "calendar_pk",
-  "version": "0.3.9",
+  "name": "calendar-pk",
+  "version": "0.3.10",
   "main": [
     "dist/css/calendar.css",
     "dist/js/calendar-tpls.js"
