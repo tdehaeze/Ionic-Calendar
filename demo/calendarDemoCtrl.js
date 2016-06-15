@@ -64,6 +64,12 @@
         $scope.calendar.eventSource = [];
         $scope.viewTitle = {};
 
+        function uniq(a) {
+            return a.sort().filter(function(item, pos, ary) {
+                return !pos || item.startTime != ary[pos - 1].startTime;
+            })
+        }
+
         $scope.loadEvents = function () {
             var events = [];
             for (var i = 0; i < 50; i += 1) {
@@ -74,8 +80,8 @@
                 events.push({
                     startTime: startTime,
                 });
-
             }
+            events = uniq(events);
             $scope.calendar.eventSource = events;
         };
 

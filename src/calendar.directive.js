@@ -33,9 +33,7 @@
       $scope.$watch(function(){
         return $scope.eventSource;
       }, function (newVal, oldVal) {
-        // if (onDataLoaded) {
-          onDataLoaded();
-        // }
+        onDataLoaded();
       }, true);
 
       init();
@@ -45,8 +43,66 @@
           vm[key] = angular.isDefined($attrs[key]) ? $interpolate($attrs[key])($scope.$parent) : calendarConfig[key];
         });
 
+        vm.currentViewIndex = 0;
         vm.currentDate = new Date();
+        refreshView();
       }
+
+      // DONE
+      // Triggered on ng-click when clicking on a date
+      // => Call the function timeSelected passed to the directive
+      vm.dayClick = function (selectedTime){
+        toogle(selectedTime);
+
+        if ($scope.views && $scope.timeSelected) {
+          $scope.timeSelected({selectedTime: selectedTime});
+        }
+      };
+
+      // DONE
+      // Called when clicking on a week
+      // => toogle all the week depending if they were all selected
+      vm.weekClick = function(date_index) {
+        var all_selected = isAllWeekSelected(date_index),
+            dates = $scope.views[vm.currentViewIndex].dates;
+
+        for (var i = 0; i < 7; i++) {
+          if (all_selected) {
+            toogle(dates[date_index + i].date);
+          } else if (!all_selected && dates[date_index + i].events.length === 0) {
+            toogle(dates[date_index + i].date);
+          }
+        }
+      };
+
+      // First called when changing the month
+      // => calculate the direction of the slide
+      // => call refreshView
+      vm.slideChanged = function ($index) {
+        $timeout(function () {
+          var currentViewIndex = vm.currentViewIndex,
+              direction = 0;
+
+          if (currentViewIndex === $index - 1 || ($index === 0 && currentViewIndex === 2)) {
+            direction = 1;
+          } else if (currentViewIndex === $index + 1 || ($index === 2 && currentViewIndex === 0)) {
+            direction = -1;
+          }
+
+          vm.currentViewIndex = $index;
+
+          vm.currentDate = getAdjacentCalendarDate(vm.currentDate, direction);
+
+          refreshView(direction);
+        }, 100);
+      };
+
+
+
+
+
+
+
 
       // DONE
       function onDataLoaded() {
@@ -54,7 +110,7 @@
             timeZoneOffset  = -new Date().getTimezoneOffset(),
             utcStartTime    = new Date(vm.range.startTime.getTime() + timeZoneOffset * 60 * 1000), // StartTime of the month
             utcEndTime      = new Date(vm.range.endTime.getTime() + timeZoneOffset * 60 * 1000), // EndTime of the month
-            dates           = $scope.views[$scope.currentViewIndex].dates; // All the dates of the current scope (42 dates)
+            dates           = $scope.views[vm.currentViewIndex].dates; // All the dates of the current scope (42 dates)
 
         // Reset
         for (var r = 0; r < 42; r += 1) {
@@ -63,7 +119,7 @@
 
         // loop over all events
         // => If eventDate is in the scope of the current view
-        //  => add the event to $scope.views[$scope.currentViewIndex].dates
+        //  => add the event to $scope.views[vm.currentViewIndex].dates
         for (var i = 0; i < eventSource.length; i += 1) {
           var event = eventSource[i],
               eventDate = new Date(event.startTime);
@@ -73,8 +129,6 @@
           }
         }
       }
-
-
 
       // DONE
       // From one time, get the corresponding index of the eventSource array
@@ -96,6 +150,7 @@
 
       // DONE
       // Used to toogle one date
+      // TODO => should delete ALL the event for the date => loop ?
       function toogle (selectedTime){
         var eventSource = $scope.eventSource;
         var event = {
@@ -111,20 +166,9 @@
       }
 
       // DONE
-      // Triggered on ng-click when clicking on a date
-      // => Call the function timeSelected passed to the directive
-      $scope.select = function (selectedTime){
-        toogle(selectedTime);
-
-        if ($scope.views && $scope.timeSelected) {
-          $scope.timeSelected({selectedTime: selectedTime});
-        }
-      };
-
-      // DONE
       // Used to get if all the week is selected
       function isAllWeekSelected (date_index){
-        var dates = $scope.views[$scope.currentViewIndex].dates,
+        var dates = $scope.views[vm.currentViewIndex].dates,
             all_selected = true;
 
         for (var i = 0; i < 7; i++) {
@@ -135,51 +179,6 @@
         }
 
         return all_selected;
-      }
-
-      // Called when clicking on a week
-      vm.weekClick = function(date_index) {
-        var all_selected = isAllWeekSelected(date_index),
-            dates = $scope.views[$scope.currentViewIndex].dates;
-
-        for (var i = 0; i < 7; i++) {
-          if (all_selected) {
-            toogle(dates[date_index + i].date);
-          } else if (!all_selected && dates[date_index + i].events.length === 0) {
-            toogle(dates[date_index + i].date);
-          }
-        }
-
-      };
-
-
-      // DONE
-      // Register $scope.slideChanged
-      registerSlideChanged();
-      function registerSlideChanged() {
-        $scope.currentViewIndex = 0;
-
-        // First called when changing the month
-        // => calculate the direction of the slide
-        // => call refreshView
-        $scope.slideChanged = function ($index) {
-          $timeout(function () {
-            var currentViewIndex = $scope.currentViewIndex,
-                direction = 0;
-
-            if (currentViewIndex === $index - 1 || ($index === 0 && currentViewIndex === 2)) {
-              direction = 1;
-            } else if (currentViewIndex === $index + 1 || ($index === 2 && currentViewIndex === 0)) {
-              direction = -1;
-            }
-
-            $scope.currentViewIndex = $index;
-
-            vm.currentDate = getAdjacentCalendarDate(vm.currentDate, direction);
-
-            refreshView(direction);
-          }, 100);
-        };
       }
 
 
@@ -206,10 +205,10 @@
       }
 
 
+
       // TODO => understand
       // Called after changing the month
       // direction -1 (gauche), +1(droite)
-      refreshView();
       function refreshView(direction) {
         vm.range = getRange(vm.currentDate);
 
@@ -218,7 +217,7 @@
         populateAdjacentViews();
 
         if (vm.queryMode === 'local') {
-          if ($scope.eventSource && onDataLoaded) {
+          if ($scope.eventSource) {
             onDataLoaded();
           }
         } else if (vm.queryMode === 'remote') {
@@ -229,9 +228,6 @@
             });
           }
         }
-
-
-
 
         // From one date
         // => get the startDate and endDate of new view corresponding to the date
@@ -268,7 +264,7 @@
           var currentViewStartDate,
               currentViewData,
               toUpdateViewIndex,
-              currentViewIndex = $scope.currentViewIndex;
+              currentViewIndex = vm.currentViewIndex;
 
           if (direction === 1) { // next month
             currentViewStartDate = getAdjacentViewStartTime(direction);
