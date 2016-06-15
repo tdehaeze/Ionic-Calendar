@@ -17,8 +17,8 @@ Add the calendar module as a dependency to your application module:
 
 Add the directive in the html page
 
-    <calendar   event-source="eventSource"
-                current-month="currentMonth"></calendar>
+    <calendar-pk    event-source="eventSource"
+                    current-month="currentMonth"></calendar-pk>
 
 # Data arguments
 * **eventSource** : The data source of the calendar, when the eventSource is set, the view will be updated accordingly. eventSource should be an array of Dates.
