@@ -2,15 +2,14 @@
 <html ng-app="calendarDemoApp">
     <head lang="en">
         <meta charset="UTF-8">
-        <meta name="description" content="Ionic Calendar Demo">
-        <title>Ionic Calendar Demo</title>
+        <meta name="description" content="Calendar-pk Demo">
+        <title>Calendar-pk Demo</title>
         <link rel="stylesheet" href="http://code.ionicframework.com/1.1.1/css/ionic.min.css"/>
-        <link rel="stylesheet" href="../dist/css/calendar.css"/>
+        <link rel="stylesheet" href="../dist/css/calendar_pk.css"/>
         <script src="http://code.ionicframework.com/1.1.1/js/ionic.bundle.min.js"></script>
         <script src="../dist/js/calendar_pk.js"></script>
         <script src="calendarDemoCtrl.js"></script>
         <script src="http://code.angularjs.org/1.4.3/i18n/angular-locale_fr.js"></script>
-        <script src="//localhost:35729/livereload.js"></script>
     </head>
 
     <body>
@@ -43,10 +42,10 @@
                 </ion-nav-buttons>
 
                 <ion-content scroll="false" class="main-content">
-                    <calendar   event-source="eventSource"
-                                month-changed="onMonthChanged(startTime, endTime, display)"
-                                time-selected="onTimeSelected(selectedTime)"
-                                week-selected="onWeekSelected(monday)"></calendar>
+                    <calendar-pk    event-source="eventSource"
+                                    month-changed="onMonthChanged(startTime, endTime, display)"
+                                    time-selected="onTimeSelected(selectedTime)"
+                                    week-selected="onWeekSelected(monday)"></calendar-pk>
                 </ion-content>
             </ion-view>
         </script>

@@ -2,16 +2,16 @@
   'use strict';
 
   angular.module('directives')
-    .directive('calendar_pk', calendar_pk);
+    .directive('calendarPk', calendarPk);
 
-  calendar_pk.$inject = [];
-  function calendar_pk() {
+  calendarPk.$inject = [];
+  function calendarPk() {
     var directive = {};
 
     directive.restrict = 'E';
     directive.replace = true;
 
-    directive.templateUrl = 'calendar_pk.html';
+    directive.templateUrl = 'calendar-pk.html';
 
     directive.scope = {
       monthChanged: '&', // Called when changing the month
