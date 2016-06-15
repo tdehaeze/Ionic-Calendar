@@ -38,7 +38,7 @@ module.exports = function (grunt) {
         sass: {
             dist: {
                 files: {
-                    'dist/css/calendar.css': 'src/scss/calendar.scss'
+                    'dist/css/calendar_pk.css': 'src/scss/calendar_pk.scss'
                 }
             }
         },
@@ -49,7 +49,7 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
-                    'dist/css/calendar.min.css': ['dist/css/calendar.css']
+                    'dist/css/calendar_pk.min.css': ['dist/css/calendar_pk.css']
                 }
             }
         },

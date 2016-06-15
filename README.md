@@ -8,8 +8,8 @@ Bower Install: `bower install calendar_pk`
 
 Load the necessary dependent files:
 
-    <link rel="stylesheet" href="lib/calendar_pk/dist/css/calendar.min.css"/>
-    <script src="lib/calendar_pk/dist/js/calendar-tpls.min.js"></script>
+    <link href="lib/calendar_pk/dist/css/calendar_pk.css" rel="stylesheet">
+    <script src="lib/calendar_pk/dist/js/calendar_pk.js"></script>
 
 Add the calendar module as a dependency to your application module:
 
