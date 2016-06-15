@@ -69,7 +69,7 @@
         for (var i = 0; i < 7; i++) {
           if (all_selected) {
             toogle(dates[date_index + i].date);
-          } else if (!all_selected && dates[date_index + i].events.length === 0) {
+          } else if (!all_selected && !dates[date_index + i].event) {
             toogle(dates[date_index + i].date);
           }
         }
@@ -97,13 +97,6 @@
         }, 100);
       };
 
-
-
-
-
-
-
-
       // DONE
       function onDataLoaded() {
         var eventSource     = $scope.eventSource, // All the events
@@ -114,18 +107,17 @@
 
         // Reset
         for (var r = 0; r < 42; r += 1) {
-          dates[r].events = [];
+          dates[r].event = false;
         }
 
         // loop over all events
         // => If eventDate is in the scope of the current view
         //  => add the event to $scope.views[vm.currentViewIndex].dates
         for (var i = 0; i < eventSource.length; i += 1) {
-          var event = eventSource[i],
-              eventDate = new Date(event.startTime);
+          var eventDate = new Date(eventSource[i]);
 
-          if (utcStartTime <= eventDate && eventDate <= utcEndTime){
-            dates[Math.floor((eventDate - utcStartTime) / 86400000)].events = [event];
+          if (utcStartTime <= eventDate && eventDate < utcEndTime){
+            dates[Math.floor((eventDate - utcStartTime) / 86400000)].event = true;
           }
         }
       }
@@ -138,8 +130,7 @@
             eventSource = $scope.eventSource;
 
         for (var i = 0; i < eventSource.length; i++) {
-          var eventTime = eventSource[i].startTime;
-          if (eventTime.getDate() === time.getDate() && eventTime.getMonth() === time.getMonth() && eventTime.getFullYear() === time.getFullYear()){
+          if (eventSource[i].getDate() === time.getDate() && eventSource[i].getMonth() === time.getMonth() && eventSource[i].getFullYear() === time.getFullYear()){
               j = i;
               break;
           }
@@ -152,16 +143,13 @@
       // Used to toogle one date
       // TODO => should delete ALL the event for the date => loop ?
       function toogle (selectedTime){
-        var eventSource = $scope.eventSource;
-        var event = {
-          startTime: selectedTime
-        };
-        var index = getEventIndex(selectedTime);
+        var eventSource = $scope.eventSource,
+            index = getEventIndex(selectedTime);
 
         if (index > -1) {
           eventSource.splice(index, 1);
         } else {
-          eventSource.push(event);
+          eventSource.push(selectedTime);
         }
       }
 

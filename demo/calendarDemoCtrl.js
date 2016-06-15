@@ -66,7 +66,7 @@
 
         function uniq(a) {
             return a.sort().filter(function(item, pos, ary) {
-                return !pos || item.startTime != ary[pos - 1].startTime;
+                return !pos || item != ary[pos - 1];
             })
         }
 
@@ -77,11 +77,9 @@
                     startDay = Math.floor(Math.random() * 90) - 45,
                     startTime = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + startDay));
 
-                events.push({
-                    startTime: startTime,
-                });
+                events.push(startTime);
             }
-            events = uniq(events);
+            // events = uniq(events);
             $scope.calendar.eventSource = events;
         };
 

@@ -20,7 +20,7 @@
                         <td ng-repeat="j in [0,1,2,3,4,5,6]"
                             ng-init="date = view.dates[7*i+j]"
                             ng-click="cc.dayClick(date.date)"
-                            ng-class="{'monthview-secondary': date.events.length > 0 && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.events.length > 0 && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}">{{date.date | date : cc.formatDay}}</td>
+                            ng-class="{'monthview-secondary': date.event && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.event && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}">{{date.date | date : cc.formatDay}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -38,7 +38,7 @@
                         <td ng-click="">SEM<br>{{view.dates[7*i].date | weekNumber}}</td>
                         <td ng-repeat="j in [0,1,2,3,4,5,6]"
                             ng-init="date = view.dates[7*i+j]"
-                            ng-class="{'monthview-secondary': date.events.length > 0 && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.events.length > 0 && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}">{{date.date | date : cc.formatDay}}</td>
+                            ng-class="{'monthview-secondary': date.event && !(date.date | sameMonth : cc.currentDate), 'monthview-primary': date.event && (date.date | sameMonth : cc.currentDate), 'monthview-current': (date.date | todayFilter), 'text-muted': !(date.date | sameMonth : cc.currentDate)}">{{date.date | date : cc.formatDay}}</td>
                     </tr>
                 </tbody>
             </table>
