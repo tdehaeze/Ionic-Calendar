@@ -2,16 +2,16 @@
   'use strict';
 
   angular.module('directives')
-    .directive('calendar', calendar);
+    .directive('calendar_pk', calendar_pk);
 
-  calendar.$inject = [];
-  function calendar() {
+  calendar_pk.$inject = [];
+  function calendar_pk() {
     var directive = {};
 
     directive.restrict = 'E';
     directive.replace = true;
 
-    directive.templateUrl = 'calendar.html';
+    directive.templateUrl = 'calendar_pk.html';
 
     directive.scope = {
       monthChanged: '&', // Called when changing the month
@@ -19,8 +19,6 @@
       weekSelected: '&', // Called when clicking on a week
       eventSource:  '=', // All the events => two way data binding
     };
-
-    // directive.require = ['calendar', '?^ngModel'];
 
     directive.controllerAs = 'cc';
     directive.controller = CalendarController;
