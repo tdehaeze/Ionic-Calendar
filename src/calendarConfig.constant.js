@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  angular.module('constants')
+  angular.module('calendar_pk.constants')
   .constant('calendarConfig', {
     formatDay:        'dd',         //
     formatDayHeader:  'EEE',        //

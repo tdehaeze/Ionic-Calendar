@@ -5,7 +5,7 @@
                     delegate-handle="monthview-slide"
                     style="height: auto;">
         <ion-slide ng-repeat="view in cc.views track by $index">
-            <table ng-if="$index === cc.currentViewIndex" class="table-bordered monthview-datetable">
+            <table ng-if="$index === cc.currentViewIndex" class="calendar-pk monthview-datetable">
                 <thead>
                     <tr>
                         <th></th>
@@ -24,7 +24,7 @@
                     </tr>
                 </tbody>
             </table>
-            <table ng-if="$index !== cc.currentViewIndex" class="table-bordered monthview-datetable">
+            <table ng-if="$index !== cc.currentViewIndex" class="calendar-pk monthview-datetable">
                 <thead>
                     <tr class="text-center">
                         <th></th>

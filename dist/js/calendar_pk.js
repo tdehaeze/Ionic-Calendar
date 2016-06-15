@@ -1,18 +1,18 @@
 (function() {
   'use strict';
 
-  angular.module('directives', []);
-  angular.module('constants', []);
-  angular.module('filters', []);
+  angular.module('calendar_pk.directives', []);
+  angular.module('calendar_pk.constants', []);
+  angular.module('calendar_pk.filters', []);
 
-  var app = angular.module('calendar_pk', ['directives', 'constants', 'templates', 'filters']);
+  var app = angular.module('calendar_pk', ['calendar_pk.directives', 'calendar_pk.constants', 'calendar_pk.templates', 'calendar_pk.filters']);
 
 })();
 
 (function() {
   'use strict';
 
-  angular.module('constants')
+  angular.module('calendar_pk.constants')
   .constant('calendarConfig', {
     formatDay:        'dd',         //
     formatDayHeader:  'EEE',        //
@@ -26,7 +26,7 @@
 (function() {
   'use strict';
 
-  angular.module('directives')
+  angular.module('calendar_pk.directives')
     .directive('calendarPk', calendarPk);
 
   calendarPk.$inject = [];
@@ -368,7 +368,7 @@
 })();
 
 (function() {
-  angular.module('filters')
+  angular.module('calendar_pk.filters')
     .filter('sameMonth', sameMonth);
 
   sameMonth.$inject = [];
@@ -384,7 +384,7 @@
 })();
 
 (function() {
-  angular.module('filters')
+  angular.module('calendar_pk.filters')
     .filter('todayFilter', todayFilter);
 
   todayFilter.$inject = [];
@@ -412,7 +412,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    delegate-handle=\"monthview-slide\"\n" +
     "                    style=\"height: auto;\">\n" +
     "        <ion-slide ng-repeat=\"view in cc.views track by $index\">\n" +
-    "            <table ng-if=\"$index === cc.currentViewIndex\" class=\"table-bordered monthview-datetable\">\n" +
+    "            <table ng-if=\"$index === cc.currentViewIndex\" class=\"calendar-pk monthview-datetable\">\n" +
     "                <thead>\n" +
     "                    <tr>\n" +
     "                        <th></th>\n" +
@@ -431,7 +431,7 @@ angular.module('templates', []).run(['$templateCache', function($templateCache) 
     "                    </tr>\n" +
     "                </tbody>\n" +
     "            </table>\n" +
-    "            <table ng-if=\"$index !== cc.currentViewIndex\" class=\"table-bordered monthview-datetable\">\n" +
+    "            <table ng-if=\"$index !== cc.currentViewIndex\" class=\"calendar-pk monthview-datetable\">\n" +
     "                <thead>\n" +
     "                    <tr class=\"text-center\">\n" +
     "                        <th></th>\n" +

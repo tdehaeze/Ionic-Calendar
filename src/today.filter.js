@@ -1,5 +1,5 @@
 (function() {
-  angular.module('filters')
+  angular.module('calendar_pk.filters')
     .filter('todayFilter', todayFilter);
 
   todayFilter.$inject = [];

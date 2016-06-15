@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  angular.module('directives')
+  angular.module('calendar_pk.directives')
     .directive('calendarPk', calendarPk);
 
   calendarPk.$inject = [];
