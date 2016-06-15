@@ -219,7 +219,6 @@
       }
 
 
-      // TODO => understand
       // Called after changing the month
       // direction -1 (gauche), +1(droite)
       function refreshView(direction) {
@@ -342,7 +341,6 @@
           //   // Used to get the "AdjacentCalendarDate"
           //   // => this is the same day as the currentCalendarDate but shifted from one month depending of the direction
           //   // => from the direction, add/substract one month to currentCalendarDate
-          //   // => TODO : should delete this function => no more currentCalendarDate/selectedDate
           //   var calculateCalendarDate = new Date(vm.currentDate),
           //       year = calculateCalendarDate.getFullYear(),
           //       month = calculateCalendarDate.getMonth() + direction,
