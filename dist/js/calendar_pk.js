@@ -47,8 +47,8 @@
 
     directive.controllerAs = 'cc';
     directive.controller = CalendarController;
-    CalendarController.$inject = ['$scope', '$attrs', '$interpolate', 'calendarConfig', '$timeout', '$filter'];
-    function CalendarController($scope, $attrs, $interpolate, calendarConfig, $timeout, $filter) {
+    CalendarController.$inject = ['$scope', '$attrs', '$interpolate', 'calendarConfig', '$timeout', '$filter', '$ionicSlideBoxDelegate'];
+    function CalendarController($scope, $attrs, $interpolate, calendarConfig, $timeout, $filter, $ionicSlideBoxDelegate) {
       var vm = this;
 
       $scope.$watch(function(){
@@ -121,10 +121,17 @@
         }, 100);
       };
 
+      $scope.$on('changeMonth', function(event, direction) {
+        var slideHandle = $ionicSlideBoxDelegate.$getByHandle('monthview-slide');
 
-
-
-
+        if (slideHandle) {
+            if (direction === 1) {
+                slideHandle.next();
+            } else if (direction === -1) {
+                slideHandle.previous();
+            }
+        }
+      });
 
       // DONE
       function onDataLoaded() {

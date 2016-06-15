@@ -59,11 +59,11 @@
     .controller('CalendarDemoCtrl', CalendarDemoCtrl);
 
     CalendarDemoCtrl.$inject = ['$scope', '$filter'];
-    function CalendarDemoCtrl($scope, $filter) {
+    function CalendarDemoCtrl ($scope, $filter){
         $scope.eventSource = [];
-        $scope.currentMonth = {};
+        $scope.currentMonth = '';
 
-        $scope.loadEvents = function () {
+        $scope.loadEvents = function (){
             var events = [];
             for (var i = 0; i < 50; i += 1) {
                 var date = new Date(),
@@ -75,17 +75,22 @@
             $scope.eventSource = events;
         };
 
-        $scope.onMonthChanged = function (startTime, endTime, display) {
+        $scope.changeMonth = function (direction){
+            $scope.$broadcast('changeMonth', direction);
+        };
+
+        $scope.onMonthChanged = function (startTime, endTime, display){
+            $scope.currentMonth = display;
             console.log('Changed month : ' + display);
         };
 
         // Called when clicking on a date
-        $scope.onTimeSelected = function (selectedTime) {
+        $scope.onTimeSelected = function (selectedTime){
             console.log('Selected time: ' + $filter('date')(selectedTime, 'longDate'));
         };
 
         // Called when clicking on a week
-        $scope.onWeekSelected = function (monday) {
+        $scope.onWeekSelected = function (monday){
             console.log('Selected week: week n°' + $filter('date')(monday, 'w') + ' of ' + monday.getFullYear());
         };
     }

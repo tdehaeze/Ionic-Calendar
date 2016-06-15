@@ -36,9 +36,13 @@
         </script>
 
         <script id="templates/home.html" type="text/ng-template">
-            <ion-view view-title={{currentMonth.display}}>
+            <ion-view view-title={{currentMonth}}>
                 <ion-nav-buttons side="right">
                     <button class="button" ng-click="loadEvents()">Load Events</button>
+                    <button class="button" ng-click="changeMonth(1)">next</button>
+                </ion-nav-buttons>
+                <ion-nav-buttons side="left">
+                    <button class="button" ng-click="changeMonth(-1)">prev</button>
                 </ion-nav-buttons>
 
                 <ion-content scroll="false">

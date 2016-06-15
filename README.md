@@ -50,17 +50,15 @@ Add the directive in the html page
     * **monday** (*DateTime*)
 
 
-<!-- # Events
+# Events
+* **changeMonth** : When receiving this event, the calendar will move the current view to previous or next range.
+    * **direction** (1: Forward -1: Backward)
 
-* changeDate
-When receiving this event, the calendar will move the current view to previous or next range.
-Parameter: direction
-1 - Forward
--1 - Backward
+```javascript
+    $scope.$broadcast('changeMonth', 1);
+```
 
-        $scope.$broadcast('changeDate', 1);
-
-* eventSourceChanged
+<!-- * eventSourceChanged
 This event is only needed when you manually modify the element in the eventSource array.
 Parameter: value
 The whole event source object
