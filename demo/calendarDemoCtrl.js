@@ -6,6 +6,9 @@
         'use strict';
         $animate.enabled(false);
     })
+    .config(function($ionicConfigProvider) {
+        $ionicConfigProvider.navBar.alignTitle('center');
+    });
 })();
 
 

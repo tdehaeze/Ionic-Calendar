@@ -12,12 +12,14 @@
         <script src="http://code.angularjs.org/1.4.3/i18n/angular-locale_fr.js"></script>
     </head>
 
-    <body>
-        <ion-nav-bar class="bar-positive" align-title="left">
-            <ion-nav-back-button></ion-nav-back-button>
-        </ion-nav-bar>
+    <body style="background-color: rgb(72, 88, 135);">
+        <div style="width: 320px; position: relative; height: 600px; margin: 30px auto 10px auto;">
+            <ion-nav-bar class="bar-positive" align-title="left">
+                <ion-nav-back-button></ion-nav-back-button>
+            </ion-nav-bar>
 
-        <ion-nav-view></ion-nav-view>
+            <ion-nav-view></ion-nav-view>
+        </div>
 
         <script id="templates/tabs.html" type="text/ng-template">
             <ion-tabs class="tabs-icon-top tabs-positive">
@@ -36,9 +38,10 @@
         </script>
 
         <script id="templates/home.html" type="text/ng-template">
-            <ion-view view-title={{currentMonth}}>
+            <ion-view view-title="{{currentMonth}}">
+                <ion-nav-bar class="bar-positive" align-title="center"></ion-nav-back-button>
+                </ion-nav-bar>
                 <ion-nav-buttons side="right">
-                    <button class="button" ng-click="loadEvents()">Load Events</button>
                     <button class="button" ng-click="changeMonth(1)">next</button>
                 </ion-nav-buttons>
                 <ion-nav-buttons side="left">
