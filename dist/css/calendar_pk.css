@@ -1,7 +1,7 @@
 .calendar-pk {
   width: 100%;
   max-width: 100%;
-  background-color: transparent;
+  background-color: white;
   border-top: 1px solid #969696;
   border-bottom: 1px solid #969696;
   table-layout: fixed; }
