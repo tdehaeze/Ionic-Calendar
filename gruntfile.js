@@ -7,7 +7,7 @@ module.exports = function (grunt) {
         },
         html2js: {
             options: {
-                module: 'templates',
+                module: 'calendar_pk.templates',
                 existingModule: false,
                 singleModule: true,
                 // base: 'src',

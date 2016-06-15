@@ -377,7 +377,7 @@
     return function (date, currentDate) {
       date = new Date(+date);
       current = new Date(+currentDate);
-      return date.getMonth() === current.getMonth();
+      return (date.getMonth() === current.getMonth() && date.getFullYear() === current.getFullYear());
     };
 
   }
@@ -393,7 +393,6 @@
     return function (date) {
       date = new Date(+date);
       var today = new Date();
-
       return (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear());
     };
 
@@ -403,7 +402,7 @@
 (function() {
 'use strict';
 
-angular.module('templates', []).run(['$templateCache', function($templateCache) {
+angular.module('calendar_pk.templates', []).run(['$templateCache', function($templateCache) {
   $templateCache.put("calendar-pk.html",
     "<div style=\"height: 100%;\">\n" +
     "    <ion-slide-box  on-slide-changed=\"cc.slideChanged($index)\"\n" +
