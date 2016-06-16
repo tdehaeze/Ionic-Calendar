@@ -4,12 +4,12 @@ Ionic calendar directive
 
 # Usage
 
-Bower Install: `bower install calendar_pk`
+Bower Install: `bower install calendar-pk`
 
 Load the necessary dependent files:
 
-    <link href="lib/calendar_pk/dist/css/calendar_pk.css" rel="stylesheet">
-    <script src="lib/calendar_pk/dist/js/calendar_pk.js"></script>
+    <link href="lib/calendar-pk/dist/css/calendar_pk.css" rel="stylesheet">
+    <script src="lib/calendar-pk/dist/js/calendar_pk.js"></script>
 
 Add the calendar module as a dependency to your application module:
 
